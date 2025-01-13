@@ -6,7 +6,13 @@
     "backend"
   ],
   "scripts": {
-    "local-test": "./smart-contracts/test/local_tests.sh"
+    "contracts:test": "./smart-contracts/test/local_tests.sh",
+    "relayer:start": "docker compose -f devops/docker/docker-compose.yml up -d relayer",
+    "relayer:stop": "docker compose -f devops/docker/docker-compose.yml down relayer",
+    "subtensor:start": "docker compose -f devops/docker/docker-compose.yml up -d subtensor",
+    "subtensor:stop": "docker compose -f devops/docker/docker-compose.yml down subtensor",
+    "evm:start": "docker compose -f devops/docker/docker-compose.yml up -d evm",
+    "evm:stop": "docker compose -f devops/docker/docker-compose.yml down evm"
   },
   "devDependencies": {
     "husky": "^8.0.3",

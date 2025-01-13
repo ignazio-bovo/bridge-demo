@@ -13,7 +13,7 @@ ENV DAEMON_HOME=$HOME/.datura
 RUN mkdir -p $DAEMON_HOME
 
 # Copy relayer source code
-COPY ../../ ./
+COPY ../../relayer ./
 
 # Build the relayer
 RUN go build -o relayer ./cmd/main.go && \

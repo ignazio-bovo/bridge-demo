@@ -1,0 +1,48 @@
+services:
+  relayer:
+    build:
+      context: ../..
+      dockerfile: devops/docker/relayer.Dockerfile
+    container_name: relayer
+    ports:
+      - "6001:5051"
+      - "6011:5053"
+    command: ["relayer", "start", "--log-level", "debug"]
+    restart: on-failure
+
+  subtensor:
+    container_name: subtensor-dev
+    build:
+      context: ../..
+      dockerfile: devops/docker/subtensor.Dockerfile
+    ports:
+      - "9944:9944"
+      - "30333:30333"
+      - "9933:9933"
+    expose:
+      - "9944"
+      - "30333"
+      - "9933"
+    environment:
+      - CARGO_HOME=/var/www/node-subtensor/.cargo
+    command: ["--dev", "--rpc-external", "--rpc-cors", "all"]
+
+  evm:
+    container_name: evm-dev
+    build:
+      context: ../..
+      dockerfile: devops/docker/evm.Dockerfile
+    ports:
+      - "8545:8545"
+    environment:
+      - ANVIL_PORT=8545
+      - ANVIL_CHAIN_ID=1
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8545"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+networks:
+  default:
+    driver: bridge
