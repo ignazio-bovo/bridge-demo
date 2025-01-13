@@ -12,8 +12,10 @@ sqd up &
 # Wait a few seconds to ensure database is ready
 sleep 5
 
-# Run sqd process ethereum
-sqd process:eth
-
-# Run sqd process subtensor
-sqd process:subtensor
+# Run both processors in parallel and wait for either to exit
+(
+    trap 'kill 0' SIGINT
+    sqd process:eth &
+    sqd process:subtensor &
+    wait
+)
