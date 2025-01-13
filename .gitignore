@@ -7,6 +7,9 @@
 /smart-contracts/cache
 /smart-contracts/node_modules
 /smart-contracts/typechain-types
+/smart-contracts/coverage
+/smart-contracts/coverage.json
+/smart-contracts/out
 
 .DS_Store
 .env
