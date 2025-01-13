@@ -95,4 +95,11 @@ task("deploy:bridge", "deploy bridge")
     );
     const stakeManagerAddress = await stakeManagerProxy.getAddress();
     console.log("🚀 StakeManager deployed to:", stakeManagerAddress);
+
+    await saveItems([
+      {
+        title: `StakeManager_${network.name}`,
+        value: stakeManagerAddress,
+      },
+    ]);
   });
