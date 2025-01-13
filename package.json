@@ -14,7 +14,9 @@
     "evm:start": "docker compose -f devops/docker/docker-compose.yml up -d evm",
     "evm:stop": "docker compose -f devops/docker/docker-compose.yml down evm",
     "backend:start": "./scripts/start_backend.sh",
-    "backend:stop": "./scripts/stop_backend.sh"
+    "backend:stop": "./scripts/stop_backend.sh",
+    "contracts:evm:deploy": "./scripts/evm_deploy.sh",
+    "contracts:subtensor:deploy": "./scripts/subtensor_deploy.sh"
   },
   "devDependencies": {
     "husky": "^8.0.3",

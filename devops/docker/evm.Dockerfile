@@ -27,4 +27,4 @@ ENV ANVIL_PORT=8545
 ENV ANVIL_CHAIN_ID=1
 
 # Update CMD to use environment variables
-CMD ["/bin/bash", "-c", "/root/.foundry/bin/anvil --port $ANVIL_PORT --chain-id $ANVIL_CHAIN_ID"]
+CMD ["/bin/bash", "-c", "/root/.foundry/bin/anvil --port $ANVIL_PORT --chain-id $ANVIL_CHAIN_ID --host 0.0.0.0"]

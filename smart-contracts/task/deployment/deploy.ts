@@ -10,18 +10,18 @@ task("deploy:bridge", "deploy bridge")
   .addParam("v", "contract version")
   .setAction(async ({ v }, { ethers, network, upgrades }) => {
     const accounts = await ethers.getSigners();
-    const deployer = accounts[10];
+    const deployer = accounts[3];
     const admin = await accounts[0].getAddress();
     const authority = await accounts[1].getAddress();
+    const deployerAddress = await deployer.getAddress();
 
     console.log("👨‍💼 Admin:", admin);
     console.log("🔑 Authority:", authority);
-    console.log("🚀 Deployer:", deployer.address);
+    console.log("🚀 Deployer:", deployerAddress);
     console.log("🌐 Network:", network.name);
 
     const tokenFactory = await ethers.getContractFactory("BridgedToken");
     const bridgedToken = await tokenFactory.deploy("TestToken", "TST", admin);
-    const asset = await bridgedToken.getAddress();
 
     const factoryName = v === "1" ? "Bridge" : `BridgeV${v}`;
     const bridgeFactory = await ethers.getContractFactory(factoryName);
@@ -84,7 +84,8 @@ task("deploy:bridge", "deploy bridge")
       },
     ]);
 
-    const daturaHotkey = "0x5GP7c3fFazW9GXK8Up3qgu2DJBk8inu4aK9TZy3RuoSWVCMi";
+    const daturaHotkey =
+      "0x0000000000000000000000000000000000000000000000000000000000000001"; // 32 bytes hex string
     const stakePrecompile = "0x0000000000000000000000000000000000000801";
     const rate = 38051750380;
     const stakeManagerFactory = await ethers.getContractFactory("StakeManager");

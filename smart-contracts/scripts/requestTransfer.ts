@@ -16,13 +16,15 @@ async function main(): Promise<void> {
     "0x8f8903DADc4316228C726C6e44dd34800860Fc62"
   );
 
+  const tokenKey = ethers.keccak256(ethers.toUtf8Bytes("DATURABRIDGE:ETH"));
+
   const tx = await bridge
     .connect(user)
     .requestTransfer(
+      tokenKey,
       "0x70997970C51812dc3A010C7d01b50e0d17dc79C8",
       ethers.parseEther("0.1"),
       31337,
-      true,
       {
         gasLimit: 3000000,
         gasPrice: ethers.parseUnits("50", "gwei"),
