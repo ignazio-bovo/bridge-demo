@@ -1,0 +1,45 @@
+{
+  "signer": {
+    "signer_db_path": "/var/data/tss-proc/signer/",
+    "block_scanner": {
+      "rpc_host": "127.0.0.1:26657",
+      "db_path": "/var/data/tss-proc/signer/"
+    }
+  },
+  "chains": [
+    {
+      "chain_id": "ETH",
+      "contract": "0x5FF59Bf2277A1e6bA9bB8A38Ea3F9ABfd3d9345a",
+      "client": {
+        "rpc_host": "https://eth-sepolia.g.alchemy.com/v2/yUTFuyJiwaZJmAAFHuoDeEWu-P9tQTSu",
+        "wss_host": "wss://eth-sepolia.g.alchemy.com/v2/yUTFuyJiwaZJmAAFHuoDeEWu-P9tQTSu",
+        "block_retry_interval": "5s",
+        "block_confirmation_count": "20",
+        "http_request_timeout": "30s"
+      },
+      "is_evm": true
+    },
+    {
+      "chain_id": "POL",
+      "contract": "0x95A94Fc761F98fcC60DA07C55F8ECDDD8B381CfF",
+      "token_account": "",
+      "pool": "",
+      "pool_privatekey": "",
+      "client": {
+        "rpc_host": "https://polygon-mumbai.g.alchemy.com/v2/xnJRCWvt-jdxvs0W9Z7qzCUNLyfP1qWg",
+        "wss_host": "wss://polygon-mumbai.g.alchemy.com/v2/xnJRCWvt-jdxvs0W9Z7qzCUNLyfP1qWg",
+        "block_retry_interval": "5s",
+        "block_confirmation_count": "20",
+        "http_request_timeout": "30s"
+      },
+      "is_evm": true
+    }
+  ],
+  "tss_ecdsa": {
+    "bootstrap_peers": [],
+    "external_ip": "192.168.0.227",
+    "p2p_port": 5051,
+    "info_address": ":8081",
+    "group": "datura_tss_ecdsa"
+  }
+}

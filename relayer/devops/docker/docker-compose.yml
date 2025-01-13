@@ -1,0 +1,15 @@
+services:
+  relayer:
+    build:
+      context: ../..
+      dockerfile: devops/docker/relayer.Dockerfile
+    container_name: relayer
+    ports:
+      - "6001:5051"
+      - "6011:5053"
+    command: ["relayer", "start", "--log-level", "debug"]
+    restart: on-failure
+
+networks:
+  default:
+    driver: bridge

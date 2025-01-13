@@ -1,0 +1,43 @@
+{
+  "signer": {
+    "signer_db_path": "/var/data/tss-proc/signer/",
+    "block_scanner": {
+      "rpc_host": "127.0.0.1:26657",
+      "db_path": "/var/data/tss-proc/signer/"
+    }
+  },
+  "chains": [
+    {
+      "chain_id": "31337",
+      "contract": "0x71c95911e9a5d330f4d621842ec243ee1343292e",
+      "client": {
+        "rpc_host": "http://127.0.0.1:8545",
+        "wss_host": "ws://127.0.0.1:8545",
+        "block_production_time": "5s",
+        "block_confirmation_count": "0",
+        "http_request_timeout": "30s"
+      },
+      "is_evm": true
+    },
+    {
+      "chain_id": "945",
+      "contract": "0x71c95911e9a5d330f4d621842ec243ee1343292e",
+      "token_account": "",
+      "client": {
+        "rpc_host": "http://127.0.0.1:9944",
+        "wss_host": "ws://127.0.0.1:9944",
+        "block_production_time": "5s",
+        "block_confirmation_count": "0",
+        "http_request_timeout": "30s"
+      },
+      "is_evm": true
+    }
+  ],
+  "tss_ecdsa": {
+    "bootstrap_peers": [],
+    "external_ip": "192.168.0.227",
+    "p2p_port": 5051,
+    "info_address": ":8081",
+    "group": "datura_tss_ecdsa"
+  }
+}
