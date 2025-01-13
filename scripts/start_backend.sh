@@ -4,18 +4,15 @@
 cd "$(dirname "$0")/../backend"
 
 # Start squid database and processor
-echo "Starting Squid database and processor..."
+docker compose up -d db &&
+    while ! docker compose exec db pg_isready -U postgres >/dev/null 2>&1; do
+        echo "Waiting for database to be ready..."
+        sleep 2
+    done
 
-# Run sqd up in the background
-sqd up &
-
-# Wait a few seconds to ensure database is ready
+# Apply database migrations
+sqd migration:apply
 sleep 5
 
-# Run both processors in parallel and wait for either to exit
-(
-    trap 'kill 0' SIGINT
-    sqd process:eth &
-    sqd process:subtensor &
-    wait
-)
+# Run sqd up in the background
+sqd run

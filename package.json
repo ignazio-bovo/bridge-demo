@@ -16,7 +16,8 @@
     "backend:start": "./scripts/start_backend.sh",
     "backend:stop": "./scripts/stop_backend.sh",
     "contracts:evm:deploy": "./scripts/evm_deploy.sh",
-    "contracts:subtensor:deploy": "./scripts/subtensor_deploy.sh"
+    "contracts:subtensor:deploy": "./scripts/subtensor_deploy.sh",
+    "run:environment": "npm run evm:start && npm run subtensor:start && npm run contracts:evm:deploy && npm run contracts:subtensor:deploy && npm run backend:start"
   },
   "devDependencies": {
     "husky": "^8.0.3",

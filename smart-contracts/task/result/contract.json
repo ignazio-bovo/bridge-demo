@@ -6,5 +6,6 @@
   "Bridge_sepolia": "0xb485d7d63B264f5C54A6d90B7845328468A72BEc",
   "BridgedToken_sepolia": "0x3764adE3BfA1D369015f8B4e49518096F7f74322",
   "Bridge_subevm": "0x006C2aeD4706Fb8e8DE58Fe5DCE87Fe5890760E7",
-  "BridgedToken_subevm": "0x74BA834a22840b1aE4Fe43b0AEb377F704D47679"
+  "BridgedToken_subevm": "0x74BA834a22840b1aE4Fe43b0AEb377F704D47679",
+  "StakeManager_localhost": "0x261D8c5e9742e6f7f1076Fa1F560894524e19cad"
 }

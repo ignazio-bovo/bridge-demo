@@ -43,6 +43,17 @@ services:
       timeout: 10s
       retries: 3
 
+  db:
+    container_name: squid-db
+    image: postgres:15
+    environment:
+      - DB_PORT=5432
+      - POSTGRES_DB=postgres
+      - POSTGRES_PASSWORD=postgres
+    ports:
+      - "5432:5432"
+    shm_size: 1gb
+
 networks:
   default:
     driver: bridge
