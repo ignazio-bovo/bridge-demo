@@ -1,0 +1,15 @@
+{
+  "name": "datura-bridge",
+  "private": true,
+  "workspaces": [
+    "contracts",
+    "backend"
+  ],
+  "scripts": {
+    "local-test": "./smart-contracts/test/local_tests.sh"
+  },
+  "devDependencies": {
+    "husky": "^8.0.3",
+    "lint-staged": "^15.2.0"
+  }
+}

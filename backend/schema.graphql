@@ -1,0 +1,42 @@
+# ID! is synonim for String!
+
+# Native token set up at migration.up()
+type Token @entity {
+  id: ID! # Key as defined in the spec in hex format without 0x prefix
+  name: String
+  symbol: String
+  decimals: Int! # probably used 18 places
+  chains: [TokenWithChain!]! @derivedFrom(field: "token")
+  transfers: [BridgeTxData!]! @derivedFrom(field: "token")
+}
+
+type TokenWithChain @entity @index(fields: ["token", "chain"]) {
+  id: ID! # tokenKey-chainId
+  token: Token!
+  chain: Chain!
+  address: String!
+  native: Boolean! # true if it's the native token of the chain
+}
+
+# Chain set up at migration.up()
+type Chain @entity {
+  id: ID! # chainId as in block.chainId
+  name: String!
+  tokens: [TokenWithChain!]! @derivedFrom(field: "chain")
+  incomingTransfers: [BridgeTxData!]! @derivedFrom(field: "destinationChain")
+  outgoingTransfers: [BridgeTxData!]! @derivedFrom(field: "sourceChain")
+}
+
+type BridgeTxData @entity {
+  id: ID! # keccak256(sourceChainId-nonce)
+  sourceChain: Chain!
+  destinationChain: Chain!
+  sourceAddress: String!
+  destinationAddress: String!
+  amount: BigInt!
+  nonce: BigInt!
+  token: Token!
+  confirmed: Boolean!
+  createdAtTimestamp: DateTime! # UTC timestamp
+  confirmedAtTimestamp: DateTime # UTC timestamp
+}
