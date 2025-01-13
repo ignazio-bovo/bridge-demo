@@ -10,6 +10,7 @@
 /smart-contracts/coverage
 /smart-contracts/coverage.json
 /smart-contracts/out
-
+/lib
+/node_modules
 .DS_Store
 .env

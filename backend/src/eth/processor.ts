@@ -2,6 +2,7 @@ import { EvmBatchProcessor, Log } from "@subsquid/evm-processor";
 import { Store, TypeormDatabase } from "@subsquid/typeorm-store";
 import { Logger, createLogger } from "@subsquid/logger";
 import { MappingHandler } from "../mappings/handler";
+import { events } from "../abi/Bridge.sol";
 
 export class EthereumProcessor {
   private chainId = 1;
@@ -36,6 +37,27 @@ export class EthereumProcessor {
     );
   }
 
+  private decodeTokenWrapped(log: Log) {
+    if (log.topics[0] !== events.TokenWrapped.topic) {
+      return null;
+    }
+    return events.TokenWrapped.decode(log);
+  }
+
+  private decodeTransferRequestExecuted(log: Log) {
+    if (log.topics[0] !== events.TransferRequestExecuted.topic) {
+      return null;
+    }
+    return events.TransferRequestExecuted.decode(log);
+  }
+
+  private decodeTokenWhitelistStatusUpdated(log: Log) {
+    if (log.topics[0] !== events.NewTokenWhitelisted.topic) {
+      return null;
+    }
+    return events.NewTokenWhitelisted.decode(log);
+  }
+
   async run(db: TypeormDatabase): Promise<void> {
     this.processor.run(db, async (ctx) => {
       for (let block of ctx.blocks) {
@@ -47,13 +69,34 @@ export class EthereumProcessor {
   }
 
   async runEtl(log: Log, store: Store): Promise<void> {
-    await this.mappingHandler.handleTokenWhitelistStatusUpdated(
-      log,
-      store,
-      this.chainId
-    );
-    await this.mappingHandler.handleTransferRequested(log, store);
-    await this.mappingHandler.handleTransferRequestExecuted(log, store);
-    await this.mappingHandler.tokenWrapped(log, store, this.chainId);
+    const decodedTokenWrapped = this.decodeTokenWrapped(log);
+    if (decodedTokenWrapped) {
+      await this.mappingHandler.handleTokenWrapped(
+        decodedTokenWrapped,
+        store,
+        this.chainId
+      );
+      return;
+    }
+
+    const decodedWhitelist = this.decodeTokenWhitelistStatusUpdated(log);
+    if (decodedWhitelist) {
+      await this.mappingHandler.handleTokenWhitelistStatusUpdated(
+        decodedWhitelist,
+        store,
+        this.chainId
+      );
+      return;
+    }
+
+    const decodedTransferRequestExecuted =
+      this.decodeTransferRequestExecuted(log);
+    if (decodedTransferRequestExecuted) {
+      await this.mappingHandler.handleTransferRequestExecuted(
+        decodedTransferRequestExecuted,
+        store
+      );
+      return;
+    }
   }
 }

@@ -12,7 +12,9 @@
     "subtensor:start": "docker compose -f devops/docker/docker-compose.yml up -d subtensor",
     "subtensor:stop": "docker compose -f devops/docker/docker-compose.yml down subtensor",
     "evm:start": "docker compose -f devops/docker/docker-compose.yml up -d evm",
-    "evm:stop": "docker compose -f devops/docker/docker-compose.yml down evm"
+    "evm:stop": "docker compose -f devops/docker/docker-compose.yml down evm",
+    "backend:start": "./scripts/start_backend.sh",
+    "backend:stop": "./scripts/stop_backend.sh"
   },
   "devDependencies": {
     "husky": "^8.0.3",

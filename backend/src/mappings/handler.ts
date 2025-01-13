@@ -1,12 +1,7 @@
 import { EventDecodingError } from "@subsquid/evm-abi";
-
 import { EventEmptyTopicsError } from "@subsquid/evm-abi";
-
 import { EventInvalidSignatureError } from "@subsquid/evm-abi";
-import {
-  decodeTokenMetadata,
-  TokenMetadataDecodingError,
-} from "../eth/decoding";
+import { TokenMetadataDecodingError } from "../eth/decoding";
 import { BridgeTxData, TokenWithChain } from "../model";
 import { Token } from "../model";
 import { events } from "../abi/Bridge.sol";
@@ -30,42 +25,40 @@ export class MappingHandler {
     this.logger = createLogger("sqd:mapping-handler");
   }
 
-  async tokenWrapped(log: Log, store: Store, chainId: number): Promise<void> {
+  async handleTokenWrapped(
+    decodedEvent: ReturnType<typeof events.TokenWrapped.decode>,
+    store: Store,
+    chainId: number
+  ): Promise<void> {
     const handlerLogger = this.logger.child({
       event: "TokenWrapped",
-      blockNumber: log.block.height,
-      transactionHash: log.transaction?.hash,
     });
-    if (log.topics[0] !== events.TokenWrapped.topic) {
-      return;
-    }
     try {
-      const decoded = events.TokenWrapped.decode(log);
       const chain = await store.get(Chain, chainId.toString()).then((chain) => {
         if (!chain) {
           throw new EntityNotFoundError("Chain", chainId.toString());
         }
         return chain;
       });
-      const metadata = decoded.tokenMetadata;
+      const metadata = decodedEvent.tokenMetadata;
 
       const token = new Token({
-        id: stripHexPrefix(decoded.tokenKey),
+        id: stripHexPrefix(decodedEvent.tokenKey),
         decimals: metadata.decimals,
         name: metadata.name,
         symbol: metadata.symbol,
       });
       const tokenWithChain = new TokenWithChain({
-        id: `${stripHexPrefix(decoded.tokenKey)}-${chain.id}`,
+        id: `${stripHexPrefix(decodedEvent.tokenKey)}-${chain.id}`,
         token: token,
         chain: chain,
-        address: decoded.wrappedToken,
-        native: checkNativeToken(decoded.tokenKey, chainId.toString()),
+        address: decodedEvent.wrappedToken,
+        native: checkNativeToken(decodedEvent.tokenKey, chainId.toString()),
       });
       token.chains = [tokenWithChain];
       chain.tokens = [tokenWithChain];
       await store.upsert(token).catch((error) => {
-        throw new UpsertFailedError("Token", decoded.tokenKey);
+        throw new UpsertFailedError("Token", decodedEvent.tokenKey);
       });
       await store.upsert(chain).catch((error) => {
         throw new UpsertFailedError("Chain", chainId.toString());
@@ -73,7 +66,7 @@ export class MappingHandler {
       await store.upsert(tokenWithChain).catch((error) => {
         throw new UpsertFailedError(
           "TokenWithChain",
-          `${decoded.tokenKey}-${chainId}`
+          `${decodedEvent.tokenKey}-${chainId}`
         );
       });
     } catch (error) {
@@ -102,18 +95,18 @@ export class MappingHandler {
     }
   }
 
-  async handleTransferRequestExecuted(log: Log, store: Store): Promise<void> {
+  async handleTransferRequestExecuted(
+    decodedEvent: ReturnType<typeof events.TransferRequestExecuted.decode>,
+    store: Store
+  ): Promise<void> {
     const handlerLogger = this.logger.child({
       event: "TransferRequestExecuted",
-      blockNumber: log.block.height,
-      transactionHash: log.transaction?.hash,
     });
-    if (log.topics[0] !== events.TransferRequestExecuted.topic) {
-      return;
-    }
     try {
-      const decoded = events.TransferRequestExecuted.decode(log);
-      const id = transferId(Number(decoded.nonce), Number(decoded.srcChainId));
+      const id = transferId(
+        Number(decodedEvent.nonce),
+        Number(decodedEvent.srcChainId)
+      );
       const txData = await store.get(BridgeTxData, id);
       if (!txData) {
         throw new PendingTxNotFoundError(id);
@@ -146,58 +139,58 @@ export class MappingHandler {
     }
   }
 
-  async handleTransferRequested(log: Log, store: Store): Promise<void> {
+  async handleTransferRequested(
+    decodedEvent: ReturnType<typeof events.TransferRequested.decode>,
+    store: Store
+  ): Promise<void> {
     const handlerLogger = this.logger.child({
       event: "TransferRequested",
-      blockNumber: log.block.height,
-      transactionHash: log.transaction?.hash,
     });
-    if (log.topics[0] !== events.TransferRequested.topic) {
-      return;
-    }
     try {
-      const decoded = events.TransferRequested.decode(log);
       const id = transferId(
-        Number(decoded.request.nonce),
-        Number(decoded.request.srcChainId)
+        Number(decodedEvent.request.nonce),
+        Number(decodedEvent.request.srcChainId)
       );
       const sourceChain = await store
-        .get(Chain, decoded.request.srcChainId.toString())
+        .get(Chain, decodedEvent.request.srcChainId.toString())
         .then((chain) => {
           if (!chain) {
             throw new EntityNotFoundError(
               "Chain",
-              decoded.request.srcChainId.toString()
+              decodedEvent.request.srcChainId.toString()
             );
           }
           return chain;
         });
       const destinationChain = await store
-        .get(Chain, decoded.request.destChainId.toString())
+        .get(Chain, decodedEvent.request.destChainId.toString())
         .then((chain) => {
           if (!chain) {
             throw new EntityNotFoundError(
               "Chain",
-              decoded.request.destChainId.toString()
+              decodedEvent.request.destChainId.toString()
             );
           }
           return chain;
         });
       const token = await store
-        .get(Token, stripHexPrefix(decoded.request.tokenKey))
+        .get(Token, stripHexPrefix(decodedEvent.request.tokenKey))
         .then((token) => {
           if (!token) {
-            throw new EntityNotFoundError("Token", decoded.request.tokenKey);
+            throw new EntityNotFoundError(
+              "Token",
+              decodedEvent.request.tokenKey
+            );
           }
           return token;
         });
 
       const txData = new BridgeTxData({
         id,
-        sourceAddress: decoded.request.from,
-        destinationAddress: decoded.request.to,
-        amount: decoded.request.amount,
-        nonce: decoded.request.nonce,
+        sourceAddress: decodedEvent.request.from,
+        destinationAddress: decodedEvent.request.to,
+        amount: BigInt(decodedEvent.request.amount),
+        nonce: BigInt(decodedEvent.request.nonce),
         sourceChain: sourceChain,
         destinationChain: destinationChain,
         token: token,
@@ -220,17 +213,17 @@ export class MappingHandler {
       await store.upsert(sourceChain).catch((error) => {
         throw new UpsertFailedError(
           "Chain",
-          decoded.request.srcChainId.toString()
+          decodedEvent.request.srcChainId.toString()
         );
       });
       await store.upsert(destinationChain).catch((error) => {
         throw new UpsertFailedError(
           "Chain",
-          decoded.request.destChainId.toString()
+          decodedEvent.request.destChainId.toString()
         );
       });
       await store.upsert(token).catch((error) => {
-        throw new UpsertFailedError("Token", decoded.request.tokenKey);
+        throw new UpsertFailedError("Token", decodedEvent.request.tokenKey);
       });
     } catch (error) {
       if (
@@ -249,47 +242,45 @@ export class MappingHandler {
   }
 
   async handleTokenWhitelistStatusUpdated(
-    log: Log,
+    decodedEvent: {
+      tokenKey: string;
+      tokenMetadata: { decimals: number; name: string; symbol: string };
+    },
     store: Store,
     chainId: number
   ): Promise<void> {
     const handlerLogger = this.logger.child({
       event: "TokenWhitelistStatusUpdated",
-      blockNumber: log.block.height,
-      transactionHash: log.transaction?.hash,
     });
-    if (log.topics[0] !== events.NewTokenWhitelisted.topic) {
-      return;
-    }
     try {
-      const decoded = events.NewTokenWhitelisted.decode(log);
-      const tokenMetadata = decoded.tokenMetadata;
-
       const chain = await store.get(Chain, chainId.toString());
       if (!chain) {
         throw new Error(`Chain not found for id: ${chainId}`);
       }
       const token = new Token({
-        id: stripHexPrefix(decoded.tokenKey),
-        decimals: tokenMetadata.decimals,
-        name: tokenMetadata.name,
-        symbol: tokenMetadata.symbol,
+        id: stripHexPrefix(decodedEvent.tokenKey),
+        decimals: decodedEvent.tokenMetadata.decimals,
+        name: decodedEvent.tokenMetadata.name,
+        symbol: decodedEvent.tokenMetadata.symbol,
       });
       const tokenWithChain = new TokenWithChain({
-        id: `${stripHexPrefix(decoded.tokenKey)}-${chain.id}`,
+        id: `${stripHexPrefix(decodedEvent.tokenKey)}-${chain.id}`,
         token: token,
         chain: chain,
-        address: decoded.tokenKey,
-        native: checkNativeToken(decoded.tokenKey, chainId.toString()),
+        address: decodedEvent.tokenKey,
+        native: checkNativeToken(decodedEvent.tokenKey, chainId.toString()),
       });
       token.chains = [tokenWithChain];
       await store.upsert(token).catch(() => {
-        throw new UpsertFailedError("Token", stripHexPrefix(decoded.tokenKey));
+        throw new UpsertFailedError(
+          "Token",
+          stripHexPrefix(decodedEvent.tokenKey)
+        );
       });
       await store.upsert(tokenWithChain).catch(() => {
         throw new UpsertFailedError(
           "TokenWithChain",
-          `${decoded.tokenKey}-${chain.id}`
+          `${decodedEvent.tokenKey}-${chain.id}`
         );
       });
     } catch (error) {
