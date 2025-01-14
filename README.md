@@ -52,3 +52,11 @@ npm run backend:start
 ```
 
 (Ctrl+C to stop the processing and then `npm run backend:down` to bring down the db container)
+
+# Info For FE development
+
+Before requesting any transfer the Token has to be whitelisted with
+
+```
+npm run contracts:whitelist_token
+```

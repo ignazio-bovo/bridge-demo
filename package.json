@@ -17,7 +17,8 @@
     "backend:stop": "./scripts/stop_backend.sh",
     "contracts:evm:deploy": "./scripts/evm_deploy.sh",
     "contracts:subtensor:deploy": "./scripts/subtensor_deploy.sh",
-    "contracts:request_transfer": "./scripts/request_transfer.sh",
+    "contracts:request_transfer": "./scripts/whitelist_token.sh && ./scripts/request_transfer.sh",
+    "contracts:whitelist_token": "./scripts/whitelist_token.sh",
     "environment:up": "npm run evm:start && npm run subtensor:start && npm run contracts:evm:deploy && npm run contracts:subtensor:deploy",
     "environment:down": "npm run evm:stop && npm run subtensor:stop"
   },
