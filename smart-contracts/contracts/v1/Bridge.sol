@@ -137,13 +137,12 @@ contract Bridge is
     function executeTransferRequests(
         TransferExecutionDetails[] calldata batch
     ) external onlyRole(AUTHORITY_ROLE) whenNotPaused nonReentrant {
-        if (batch.length == 0 || batch.length > MAX_CONFIRMATION_LENGTH)
-            revert InvalidInput();
-
-        for (uint256 i = 0; i < batch.length; ++i) {
-            _processTransferRequest(batch[i]);
-            emit TransferRequestExecuted(batch[i].nonce, batch[i].srcChainId);
-        }
+        // if (batch.length == 0 || batch.length > MAX_CONFIRMATION_LENGTH)
+        //     revert InvalidInput();
+        // for (uint256 i = 0; i < batch.length; ++i) {
+        //     _processTransferRequest(batch[i]);
+        //     emit TransferRequestExecuted(batch[i].nonce, batch[i].srcChainId);
+        // }
     }
 
     function _processTransferRequest(

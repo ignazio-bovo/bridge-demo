@@ -106,6 +106,7 @@ func (c *DefaultConfirmTx) ConfirmConfirmTransferRequest(batch []domain_common.B
 		log.Error().AnErr("Error getting suggested gas price", err)
 		return err
 	}
+	log.Debug().Msgf("💰 Gas price: %d", gasPrice)
 
 	// Pack the function call with parameters
 	data, err := c.contractABI.Pack("executeTransferRequests", batch)
@@ -123,6 +124,7 @@ func (c *DefaultConfirmTx) ConfirmConfirmTransferRequest(batch []domain_common.B
 		Value:    big.NewInt(0),
 		Data:     data,
 	}
+
 	gasLimit, err := c.destinationClient.EstimateGas(context.Background(), msg)
 	if err != nil {
 		log.Error().AnErr("Error estimating gas limit", err)
@@ -130,9 +132,7 @@ func (c *DefaultConfirmTx) ConfirmConfirmTransferRequest(batch []domain_common.B
 		gasLimit = uint64(400000)
 		log.Warn().Msgf("Using fallback gas limit of %d on chainId %d", gasLimit, c.chainId)
 	}
-
-	// Add 10% buffer to estimated gas limit
-	gasLimit = uint64(float64(gasLimit) * 1.1)
+	log.Debug().Msgf("⛽ Gas limit: %d", gasLimit)
 
 	// Calculate total value from batch
 	totalValue := big.NewInt(0)

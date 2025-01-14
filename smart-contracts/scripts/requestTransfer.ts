@@ -24,7 +24,7 @@ async function main(): Promise<void> {
       tokenKey,
       "0x70997970C51812dc3A010C7d01b50e0d17dc79C8",
       ethers.parseEther("0.1"),
-      31337,
+      1,
       {
         gasLimit: 3000000,
         gasPrice: ethers.parseUnits("50", "gwei"),

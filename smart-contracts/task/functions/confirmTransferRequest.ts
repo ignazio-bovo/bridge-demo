@@ -32,15 +32,18 @@ task(
 
     const authority = accounts[1];
 
-    const contractKey =
-      `Bridge_${hre.network.name}` as keyof typeof DeployedContracts;
-    const deployedContract = DeployedContracts[contractKey];
+    let deployedContract: string;
+    if (hre.network.name === "localhost") {
+      const contractKey =
+        `Bridge_${hre.network.name}` as keyof typeof DeployedContracts;
+      deployedContract = DeployedContracts[contractKey];
+    } else {
+      deployedContract = "0x057ef64E23666F000b34aE31332854aCBd1c8544";
+    }
 
     // Get the contract factory and attach to the deployed address
     const Bridge = await hre.ethers.getContractFactory("Bridge");
     const bridge = Bridge.attach(deployedContract).connect(authority) as Bridge;
-
-    const destinationChain = hre.network.config.chainId!;
 
     // Convert amount to Wei
     const amountWei = hre.ethers.parseEther(amount);
@@ -65,7 +68,18 @@ task(
       srcChainId: sourceChainId,
     };
 
+    // Get authority balance before executing transfer
+    const authorityBalance = await hre.ethers.provider.getBalance(
+      authority.address
+    );
+    console.log(
+      "💸 Authority balance:",
+      hre.ethers.formatEther(authorityBalance),
+      "ETH"
+    );
     const tx = await bridge.executeTransferRequests([request]);
+
+    console.log("🚀 Transaction sent:", tx.toJSON());
 
     const receipt = await tx.wait();
     expect(receipt, "Transaction failed");

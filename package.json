@@ -7,7 +7,7 @@
   ],
   "scripts": {
     "contracts:test": "./smart-contracts/test/local_tests.sh",
-    "relayer:start": "docker compose -f devops/docker/docker-compose.yml up -d relayer",
+    "relayer:start": "docker compose -f devops/docker/docker-compose.yml up -d relayer --build",
     "relayer:stop": "docker compose -f devops/docker/docker-compose.yml down relayer",
     "subtensor:start": "docker compose -f devops/docker/docker-compose.yml up -d subtensor",
     "subtensor:stop": "docker compose -f devops/docker/docker-compose.yml down subtensor",
