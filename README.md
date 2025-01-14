@@ -2,13 +2,17 @@
 
 # Dependencies
 
-1. Install squid
+Assumes that NodeJs v20+ and Docker are installed.
+
+Install squid
 
 ```
 npm i -g @subsquid/cli
 ```
 
-2. Build backend dependency
+# Build
+
+1. Build backend dependency
 
 ```
 cd backend
@@ -16,15 +20,35 @@ npm i
 sqd build
 ```
 
-3. Install dependencies on the smart contract directorie
+2. Install dependencies on the smart contract directories
 
 ```
 cd smart-contracts
 npm i
 ```
 
-4. Run the environment
+# Run
+
+1. Deploy smart contract only
 
 ```
-npm run environmen:up
+npm run environment:up
 ```
+
+(`npm run environment:down` for stopping)
+
+2. Start the relayer
+
+```
+npm run relayer:start
+```
+
+(`npm run relayer:stop` for stopping)
+
+3. Start the backend
+
+```
+npm run backend:start
+```
+
+(Ctrl+C to stop the processing and then `npm run backend:down` to bring down the db container)

@@ -18,8 +18,8 @@
     "contracts:evm:deploy": "./scripts/evm_deploy.sh",
     "contracts:subtensor:deploy": "./scripts/subtensor_deploy.sh",
     "contracts:request_transfer": "./scripts/request_transfer.sh",
-    "setup:environment": "npm run evm:start && npm run subtensor:start && npm run contracts:evm:deploy && npm run contracts:subtensor:deploy",
-    "run:environment": "npm run evm:start && npm run subtensor:start && npm run contracts:evm:deploy && npm run contracts:subtensor:deploy && npm run backend:start"
+    "environment:up": "npm run evm:start && npm run subtensor:start && npm run contracts:evm:deploy && npm run contracts:subtensor:deploy",
+    "environment:down": "npm run evm:stop && npm run subtensor:stop"
   },
   "devDependencies": {
     "husky": "^8.0.3",

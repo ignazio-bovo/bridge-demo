@@ -127,8 +127,8 @@ func (c *DefaultConfirmTx) ConfirmConfirmTransferRequest(batch []domain_common.B
 	if err != nil {
 		log.Error().AnErr("Error estimating gas limit", err)
 		// Fallback to default gas limit if estimation fails
-		gasLimit = uint64(300000)
-		log.Warn().Msgf("Using fallback gas limit of %d", gasLimit)
+		gasLimit = uint64(400000)
+		log.Warn().Msgf("Using fallback gas limit of %d on chainId %d", gasLimit, c.chainId)
 	}
 
 	// Add 10% buffer to estimated gas limit
@@ -183,7 +183,6 @@ func (c *DefaultConfirmTx) ConfirmConfirmTransferRequest(batch []domain_common.B
 		log.Error().AnErr("Error getting chain ID", err)
 		return err
 	}
-	log.Debug().Msgf("Chain ID: %d", chainID)
 
 	signedTx, err := types.SignTx(tx, types.NewEIP155Signer(chainID), privateKey)
 	if err != nil {
