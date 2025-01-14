@@ -3,6 +3,7 @@ import { HardhatRuntimeEnvironment } from "hardhat/types";
 import { Bridge, BridgedToken } from "../../typechain-types";
 import DeployedContracts from "../result/contract.json";
 import { ethers } from "ethers";
+import { fundSubtensorAccount } from "../../scripts/fundSubtensorAccounts";
 
 export const createTokenMetadata = (
   tokenSymbol: string,
@@ -22,53 +23,46 @@ task(
 )
   .addParam("to", "The recipient address")
   .addParam("amount", "The amount to transfer (in ETH)")
-  .addFlag("native", "Whether the transfer is native or bridged")
   .addParam("destination", "The destination chain ID")
   .setAction(async (taskArgs, hre: HardhatRuntimeEnvironment) => {
-    const { to, amount: amountUnit, native, destination } = taskArgs;
+    const { to, amount: amountUnit, destination } = taskArgs;
 
     const signers = await hre.ethers.getSigners();
-    const admin = signers[0];
     const fromSigner = signers[2];
+    const fromAddress = await fromSigner.getAddress();
+    const ethers = hre.ethers;
 
     const bridgeProxyAddress =
       DeployedContracts[
         `Bridge_${hre.network.name}` as keyof typeof DeployedContracts
       ];
-    const bridgedTokenAddress =
-      DeployedContracts[
-        `BridgedToken_${hre.network.name}` as keyof typeof DeployedContracts
-      ];
+
+    let bridgedTokenAddress: string;
+    let tokenKey: string;
+    if (hre.network.name !== "localhost") {
+      bridgedTokenAddress = "0x057ef64E23666F000b34aE31332854aCBd1c8544";
+      tokenKey = ethers.keccak256(ethers.toUtf8Bytes("DATURABRIDGE:TAO"));
+      await fundSubtensorAccount(fromAddress, 10000);
+    } else {
+      bridgedTokenAddress =
+        DeployedContracts[
+          `BridgedToken_${hre.network.name}` as keyof typeof DeployedContracts
+        ];
+      tokenKey = ethers.keccak256(ethers.toUtf8Bytes("DATURABRIDGE:ETH"));
+    }
 
     // Get the contract factory and attach to the deployed address
-    const bridge = (await (await hre.ethers.getContractFactory("Bridge"))
+    const bridge = (await hre.ethers.getContractFactory("Bridge"))
       .attach(bridgeProxyAddress)
-      .connect(fromSigner)) as Bridge;
+      .connect(fromSigner) as Bridge;
 
     // Convert amount to Wei
     const amount = hre.ethers.parseEther(amountUnit);
 
-    if (!native) {
-      const bridgedToken = (await hre.ethers.getContractFactory("BridgedToken"))
-        .attach(bridgedTokenAddress)
-        .connect(admin) as BridgedToken;
-      await bridgedToken.mint(fromSigner.address, amount);
-      await bridgedToken
-        .connect(fromSigner)
-        .approve(bridgeProxyAddress, amount);
-    }
-
-    const ethers = hre.ethers;
-    const tokenKey = ethers.keccak256(ethers.toUtf8Bytes("DATURABRIDGE:ETH"));
-
-    const tx = await bridge.requestTransfer(
-      tokenKey,
-      to,
-      amount,
-      BigInt(destination),
-      {
-        value: native ? amount : 0n,
-      }
-    );
+    const tx = await bridge
+      .connect(fromSigner)
+      .requestTransfer(tokenKey, to, amount, BigInt(destination), {
+        value: amount,
+      });
     await tx.wait();
   });

@@ -19,30 +19,41 @@ export const createTokenMetadata = (
 
 task("functions:whitelistToken", "Whitelists a token on the Bridge contract")
   .addParam("address", "The address of the token to whitelist")
+  .addParam("name", "The name of the token")
+  .addParam("symbol", "The symbol of the token")
+  .addParam("decimals", "The decimals of the token")
   .setAction(async (taskArgs, hre: HardhatRuntimeEnvironment) => {
-    const { address: tokenAddress } = taskArgs;
+    const { address: tokenAddress, name, symbol, decimals } = taskArgs;
     const admin = (await hre.ethers.getSigners())[0];
 
-    const contractKey =
-      `Bridge_${hre.network.name}` as keyof typeof DeployedContracts;
-    const deployedContract = DeployedContracts[contractKey];
+    let deployedContract: string;
+    if (hre.network.name !== "localhost") {
+      deployedContract = "0x057ef64E23666F000b34aE31332854aCBd1c8544";
+    } else {
+      const deployedContractKey =
+        `Bridge_${hre.network.name}` as keyof typeof DeployedContracts;
+      deployedContract = DeployedContracts[deployedContractKey];
+    }
 
     // Get the contract factory and attach to the deployed address
     const Bridge = await hre.ethers.getContractFactory("Bridge");
     const bridge = Bridge.attach(deployedContract).connect(admin) as Bridge;
 
     const ethers = hre.ethers;
-    const tokenKey = ethers.keccak256(ethers.toUtf8Bytes("DATURABRIDGE:ETH"));
+    const capSymbol = symbol.toUpperCase();
+    const tokenKey = ethers.keccak256(
+      ethers.toUtf8Bytes(`DATURABRIDGE:${capSymbol}`)
+    );
     const tx = await bridge.whitelistToken(
       tokenKey,
       true,
       tokenAddress,
-      "ETH",
-      "Ether",
-      18
+      name,
+      symbol,
+      decimals
     );
 
     await tx.wait();
 
-    console.log("👉 Token whitelisted");
+    console.log(`👉 Token whitelisted ${name} (${symbol})`);
   });
