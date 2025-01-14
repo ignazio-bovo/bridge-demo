@@ -9,7 +9,6 @@ import {
 const SUBTENSOR_GAS_LIMIT = 60000000;
 
 async function main(): Promise<void> {
-  const provider = new ethers.JsonRpcProvider(subtensorExtraConfig.httpUrl);
   const accounts = await ethers.getSigners();
   const deployer = accounts[3];
   const admin = accounts[0];
@@ -22,9 +21,6 @@ async function main(): Promise<void> {
   await fundSubtensorAccount(deployerAddress, 1000000);
   await fundSubtensorAccount(adminAddress, 1000000);
   await fundSubtensorAccount(authorityAddress, 1000000);
-
-  let nativeBalance = await provider.getBalance(authorityAddress);
-  console.log("🪙 Authority native balance:", nativeBalance.toString(), "wei");
 
   // Deploy upgradeable bridge
   console.log("👉 Deploying bridge...");

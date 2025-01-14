@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: MIT
 
 pragma solidity ^0.8.20;
-import "hardhat/console.sol";
 
 import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import {UUPSUpgradeable} from "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
@@ -115,6 +114,8 @@ contract Bridge is
         });
         transferRequests[bridgeNonce] = request;
         bridgeNonce++;
+
+        // emit TestEvent(true);
 
         // INTERACTIONS
         if (tokenInfo.managed) {

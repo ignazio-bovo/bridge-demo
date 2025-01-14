@@ -64,5 +64,7 @@ task(
       .requestTransfer(tokenKey, to, amount, BigInt(destination), {
         value: amount,
       });
+
     await tx.wait();
+    console.log("🚀 Transaction sent:", tx.hash);
   });

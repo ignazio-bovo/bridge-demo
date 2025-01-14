@@ -7,38 +7,32 @@ import {
 
 async function main(): Promise<void> {
   const accounts = await ethers.getSigners();
-  const user = accounts[2];
-  const address = await user.getAddress();
+  const admin = accounts[0];
+  const address = await admin.getAddress();
 
-  await fundSubtensorAccount(address, 100000);
-
+  await fundSubtensorAccount(address, 10000);
   const bridge = await ethers.getContractAt(
     "Bridge",
     "0x057ef64E23666F000b34aE31332854aCBd1c8544",
-    user
+    admin
   );
 
   const tokenKey = ethers.keccak256(ethers.toUtf8Bytes("DATURABRIDGE:TAO"));
-  const amount = ethers.parseEther("0.1");
 
-  const tx = await bridge.requestTransfer(
+  const tx = await bridge.whitelistToken(
     tokenKey,
-    "0x70997970C51812dc3A010C7d01b50e0d17dc79C8",
-    amount,
-    1,
+    true,
+    "0x0000000000000000000000000000000000000000",
+    "TAO",
+    "Tao",
+    9,
     {
       gasLimit: 6000000,
-      value: amount,
     }
   );
 
-  const receipt = await tx.wait();
-  if (receipt?.status === 0) {
-    throw new Error(`Transaction failed: ${tx.hash}`);
-  }
   console.log("🚀 Transaction sent:", tx.hash);
-  const topic0 = receipt?.logs[0]?.topics[0];
-  console.log("Topic[0]:", topic0);
+  await tx.wait();
 }
 
 main().catch((error: Error) => {
