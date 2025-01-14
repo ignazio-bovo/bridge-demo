@@ -183,6 +183,7 @@ func (c *DefaultConfirmTx) ConfirmConfirmTransferRequest(batch []domain_common.B
 		log.Error().AnErr("Error getting chain ID", err)
 		return err
 	}
+	log.Debug().Msgf("Chain ID: %d", chainID)
 
 	signedTx, err := types.SignTx(tx, types.NewEIP155Signer(chainID), privateKey)
 	if err != nil {
