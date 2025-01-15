@@ -3,6 +3,7 @@ import { SubstrateBatchProcessor, Event } from "@subsquid/substrate-processor";
 import { Logger, createLogger } from "@subsquid/logger";
 import { MappingHandler } from "../mappings/handler";
 import { events } from "../abi/Bridge.sol";
+import { EventRecord } from "@subsquid/evm-abi";
 
 export class SubtensorProcessor {
   private processor: SubstrateBatchProcessor;
@@ -24,6 +25,14 @@ export class SubtensorProcessor {
       .setFinalityConfirmation(0)
       .addEvmLog({
         address: [this.CONTRACT_ADDRESS],
+      })
+      .setFields({
+        event: {
+          name: true,
+          args: true,
+          topics: true,
+          data: true,
+        },
       });
 
     this.logger.info(
@@ -31,7 +40,7 @@ export class SubtensorProcessor {
     );
   }
 
-  async runEtl(event: Event, store: Store): Promise<void> {
+  async runEtl(event: EventRecord, store: Store): Promise<void> {
     const decodedTokenWrapped = this.decodeTokenWrapped(event);
     if (decodedTokenWrapped) {
       await this.handler.handleTokenWrapped(
@@ -63,25 +72,25 @@ export class SubtensorProcessor {
     }
   }
 
-  private decodeTokenWrapped(event: Event) {
+  private decodeTokenWrapped<E extends EventRecord>(event: E) {
     try {
-      return events.TokenWrapped.decode(event.args);
+      return events.TokenWrapped.decode(event);
     } catch (error) {
       return null;
     }
   }
 
-  private decodeTransferRequestExecuted(event: Event) {
+  private decodeTransferRequestExecuted<E extends EventRecord>(event: E) {
     try {
-      return events.TransferRequestExecuted.decode(event.args);
+      return events.TransferRequestExecuted.decode(event);
     } catch (error) {
       return null;
     }
   }
 
-  private decodeTokenWhitelistStatusUpdated(event: Event) {
+  private decodeTokenWhitelistStatusUpdated<E extends EventRecord>(event: E) {
     try {
-      return events.NewTokenWhitelisted.decode(event.args);
+      return events.NewTokenWhitelisted.decode(event);
     } catch (error) {
       return null;
     }
@@ -92,7 +101,7 @@ export class SubtensorProcessor {
       for (let block of ctx.blocks) {
         for (let event of block.events) {
           if (event.name === "EVM.Log") {
-            await this.runEtl(event, ctx.store);
+            await this.runEtl(event.args.log, ctx.store);
           }
         }
       }
