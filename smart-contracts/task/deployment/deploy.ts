@@ -10,18 +10,18 @@ task("deploy:bridge", "deploy bridge")
   .addParam("v", "contract version")
   .setAction(async ({ v }, { ethers, network, upgrades }) => {
     const accounts = await ethers.getSigners();
-    const deployer = accounts[3];
-    const admin = await accounts[0].getAddress();
-    const authority = await accounts[1].getAddress();
-    const deployerAddress = await deployer.getAddress();
 
-    console.log("👨‍💼 Admin:", admin);
-    console.log("🔑 Authority:", authority);
+    const deployer = network.name === "sepolia" ? accounts[0] : accounts[3];
+    const admin = accounts[0];
+    const authority = network.name === "sepolia" ? accounts[0] : accounts[1];
+    const deployerAddress = await deployer.getAddress();
+    const adminAddress = await admin.getAddress();
+    const authorityAddress = await authority.getAddress();
+
+    console.log("👨‍💼 Admin:", adminAddress);
+    console.log("🔑 Authority:", authorityAddress);
     console.log("🚀 Deployer:", deployerAddress);
     console.log("🌐 Network:", network.name);
-
-    const tokenFactory = await ethers.getContractFactory("BridgedToken");
-    const bridgedToken = await tokenFactory.deploy("TestToken", "TST", admin);
 
     const factoryName = v === "1" ? "Bridge" : `BridgeV${v}`;
     const bridgeFactory = await ethers.getContractFactory(factoryName);
@@ -34,8 +34,8 @@ task("deploy:bridge", "deploy bridge")
 
     if (v === "1" || !deployedContract) {
       bridge = await upgrades.deployProxy(
-        bridgeFactory.connect(accounts[1]), // Connect with authority account (accounts[1])
-        [authority, admin],
+        bridgeFactory.connect(deployer), // Connect with authority account (accounts[1])
+        [authorityAddress, adminAddress],
         {
           initializer: "initialize",
           timeout: 60000,
@@ -77,10 +77,6 @@ task("deploy:bridge", "deploy bridge")
       {
         title: `Bridge_${network.name}`,
         value: bridgeAddress,
-      },
-      {
-        title: `BridgedToken_${network.name}`,
-        value: await bridgedToken.getAddress(),
       },
     ]);
 

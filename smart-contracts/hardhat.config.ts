@@ -52,7 +52,7 @@ const config: HardhatUserConfig = {
       accounts: [privateKey!],
       chainId: 11155111,
     },
-    subevm: {
+    subevmTestnet: {
       url: "https://evm-testnet.dev.opentensor.ai",
       accounts: [privateKey!],
       chainId: 945,
@@ -66,6 +66,16 @@ const config: HardhatUserConfig = {
   },
   etherscan: {
     apiKey: etherscanApiKey!,
+    customChains: [
+      {
+        network: "subevmTestnet",
+        chainId: 945,
+        urls: {
+          apiURL: "https://evm-testscan.dev.opentensor.ai/api",
+          browserURL: "https://evm-testscan.dev.opentensor.ai",
+        },
+      },
+    ],
   },
 };
 

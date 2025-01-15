@@ -11,20 +11,19 @@ export class SubtensorProcessor {
   private chainId: number;
   private CONTRACT_ADDRESS =
     process.env.CONTRACT_ADDRESS ||
-    "0x71c95911e9a5d330f4d621842ec243ee1343292e";
+    "0x057ef64E23666F000b34aE31332854aCBd1c8544";
 
   constructor() {
     this.logger = createLogger("sqd:subtensor-processor");
     this.handler = new MappingHandler();
     this.chainId = 945;
-    // First we configure data retrieval.
+
     this.processor = new SubstrateBatchProcessor()
+      .setBlockRange({ from: 0 })
       .setRpcEndpoint("http://127.0.0.1:9944")
-      .setFinalityConfirmation(15)
-      .addEthereumTransaction({})
+      .setFinalityConfirmation(0)
       .addEvmLog({
         address: [this.CONTRACT_ADDRESS],
-        range: { from: 1 },
       });
 
     this.logger.info(
@@ -65,24 +64,27 @@ export class SubtensorProcessor {
   }
 
   private decodeTokenWrapped(event: Event) {
-    if (event.args.topics[0] !== events.TokenWrapped.topic) {
+    try {
+      return events.TokenWrapped.decode(event.args);
+    } catch (error) {
       return null;
     }
-    return events.TokenWrapped.decode(event.args);
   }
 
   private decodeTransferRequestExecuted(event: Event) {
-    if (event.args.topics[0] !== events.TransferRequestExecuted.topic) {
+    try {
+      return events.TransferRequestExecuted.decode(event.args);
+    } catch (error) {
       return null;
     }
-    return events.TransferRequestExecuted.decode(event.args);
   }
 
   private decodeTokenWhitelistStatusUpdated(event: Event) {
-    if (event.args.topics[0] !== events.NewTokenWhitelisted.topic) {
+    try {
+      return events.NewTokenWhitelisted.decode(event.args);
+    } catch (error) {
       return null;
     }
-    return events.NewTokenWhitelisted.decode(event.args);
   }
 
   async run(db: TypeormDatabase): Promise<void> {

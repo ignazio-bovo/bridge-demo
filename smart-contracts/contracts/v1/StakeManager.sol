@@ -67,7 +67,6 @@ contract StakeManager is
         bridge = _bridge;
         rewardRate = _rewardRate;
         __UUPSUpgradeable_init();
-        __ReentrancyGuard_init();
         daturaStakingHotkey = _daturaHotkey;
         address admin = bridge.getAdmin();
         __Ownable_init(admin);

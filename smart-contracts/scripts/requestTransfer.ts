@@ -37,8 +37,6 @@ async function main(): Promise<void> {
     throw new Error(`Transaction failed: ${tx.hash}`);
   }
   console.log("🚀 Transaction sent:", tx.hash);
-  const topic0 = receipt?.logs[0]?.topics[0];
-  console.log("Topic[0]:", topic0);
 }
 
 main().catch((error: Error) => {

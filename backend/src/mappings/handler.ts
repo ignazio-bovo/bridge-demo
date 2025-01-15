@@ -6,7 +6,6 @@ import { BridgeTxData, TokenWithChain } from "../model";
 import { Token } from "../model";
 import { events } from "../abi/Bridge.sol";
 import { Chain } from "../model";
-import { Log } from "@subsquid/evm-processor";
 import { Store } from "@subsquid/typeorm-store";
 import {
   checkNativeToken,
@@ -69,6 +68,7 @@ export class MappingHandler {
           `${decodedEvent.tokenKey}-${chainId}`
         );
       });
+      handlerLogger.info(`TokenWrapped event processed successfully`);
     } catch (error) {
       if (
         error instanceof EventDecodingError ||
@@ -116,6 +116,7 @@ export class MappingHandler {
       await store.upsert(txData).catch((error) => {
         throw new UpsertFailedError("BridgeTxData", id);
       });
+      handlerLogger.info(`TransferRequestExecuted processed successfully`);
     } catch (error) {
       if (
         error instanceof EventDecodingError ||
@@ -225,6 +226,7 @@ export class MappingHandler {
       await store.upsert(token).catch((error) => {
         throw new UpsertFailedError("Token", decodedEvent.request.tokenKey);
       });
+      handlerLogger.info(`TransferRequested processed successfully`);
     } catch (error) {
       if (
         error instanceof EventDecodingError ||
@@ -283,6 +285,7 @@ export class MappingHandler {
           `${decodedEvent.tokenKey}-${chain.id}`
         );
       });
+      handlerLogger.info(`TokenWhitelistStatusUpdated processed successfully`);
     } catch (error) {
       if (
         error instanceof EventDecodingError ||

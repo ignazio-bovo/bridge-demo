@@ -10,7 +10,7 @@ export class EthereumProcessor {
   private logger: Logger;
   private CONTRACT_ADDRESS =
     process.env.CONTRACT_ADDRESS ||
-    "0x71c95911e9a5d330f4d621842ec243ee1343292e";
+    "0x261D8c5e9742e6f7f1076Fa1F560894524e19cad";
 
   private mappingHandler: MappingHandler;
 
@@ -19,17 +19,11 @@ export class EthereumProcessor {
 
     this.logger = createLogger("sqd:evm-processor");
     this.processor = new EvmBatchProcessor()
+      .setBlockRange({ from: 0 })
       .setRpcEndpoint("http://127.0.0.1:8545")
-      .setFinalityConfirmation(15)
+      .setFinalityConfirmation(0)
       .addLog({
         address: [this.CONTRACT_ADDRESS],
-        range: { from: 1 },
-      })
-      .setFields({
-        log: {
-          transactionHash: true,
-          topics: true,
-        },
       });
 
     this.logger.info(
@@ -45,23 +39,28 @@ export class EthereumProcessor {
   }
 
   private decodeTransferRequestExecuted(log: Log) {
-    if (log.topics[0] !== events.TransferRequestExecuted.topic) {
+    try {
+      const decoded = events.TransferRequestExecuted.decode(log);
+      return decoded;
+    } catch (error) {
       return null;
     }
-    return events.TransferRequestExecuted.decode(log);
   }
 
   private decodeTokenWhitelistStatusUpdated(log: Log) {
-    if (log.topics[0] !== events.NewTokenWhitelisted.topic) {
+    try {
+      const decoded = events.NewTokenWhitelisted.decode(log);
+      return decoded;
+    } catch (error) {
       return null;
     }
-    return events.NewTokenWhitelisted.decode(log);
   }
 
   async run(db: TypeormDatabase): Promise<void> {
     this.processor.run(db, async (ctx) => {
       for (let block of ctx.blocks) {
         for (let log of block.logs) {
+          this.logger.info(`Processing log: ${log}`);
           await this.runEtl(log, ctx.store);
         }
       }

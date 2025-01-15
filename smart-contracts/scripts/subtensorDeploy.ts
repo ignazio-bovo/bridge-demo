@@ -1,26 +1,24 @@
-import { ethers, upgrades } from "hardhat";
-import fs from "fs";
-import {
-  privateKeys,
-  fundSubtensorAccount,
-  subtensorExtraConfig,
-} from "./fundSubtensorAccounts";
+import { ethers, network } from "hardhat";
+import { fundSubtensorAccount } from "./fundSubtensorAccounts";
 
-const SUBTENSOR_GAS_LIMIT = 60000000;
+const SUBTENSOR_GAS_LIMIT = 30000000;
 
 async function main(): Promise<void> {
   const accounts = await ethers.getSigners();
-  const deployer = accounts[3];
-  const admin = accounts[0];
-  const authority = accounts[1];
+  const deployer = network.name === "subevmTestnet" ? accounts[0] : accounts[3];
+  const admin = network.name === "subevmTestnet" ? accounts[0] : accounts[0];
+  const authority =
+    network.name === "subevmTestnet" ? accounts[0] : accounts[1];
 
   const deployerAddress = await deployer.getAddress();
   const adminAddress = await admin.getAddress();
   const authorityAddress = await authority.getAddress();
 
-  await fundSubtensorAccount(deployerAddress, 1000000);
-  await fundSubtensorAccount(adminAddress, 1000000);
-  await fundSubtensorAccount(authorityAddress, 1000000);
+  if (network.name !== "subevmTestnet") {
+    await fundSubtensorAccount(deployerAddress, 1000000);
+    await fundSubtensorAccount(adminAddress, 1000000);
+    await fundSubtensorAccount(authorityAddress, 1000000);
+  }
 
   // Deploy upgradeable bridge
   console.log("👉 Deploying bridge...");
@@ -38,7 +36,7 @@ async function main(): Promise<void> {
 
   // Deploy StakeManager
   const daturaHotkey =
-    "0x0000000000000000000000000000000000000000000000000000000000000000";
+    "0x0000000000000000000000000000000000000000000000000000000000000001"; // 32 bytes hex string
   const stakePrecompile = "0x0000000000000000000000000000000000000801";
   const rate = 38051750380;
 
@@ -58,7 +56,19 @@ async function main(): Promise<void> {
     }
   );
   const stakeManagerAddress = await stakeManager.getAddress();
+  await stakeManager.deploymentTransaction()?.wait();
   console.log("🚀 StakeManager deployed to:", stakeManagerAddress);
+
+  // Set StakeManager to bridge on deployment on production
+  if (network.name === "subevm") {
+    const setStakingManagerTx = await bridge
+      .connect(admin)
+      .setStakingManager(stakeManagerAddress, {
+        gasLimit: SUBTENSOR_GAS_LIMIT,
+      });
+    await setStakingManagerTx.wait();
+    console.log("🚧 StakeManager set to bridge");
+  }
 }
 
 main().catch((error: Error) => {
