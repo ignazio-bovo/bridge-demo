@@ -62,9 +62,9 @@ export class SubtensorProcessor {
       return;
     }
 
-    const decodedWhitelist = this.decodeTokenWhitelistStatusUpdated(event);
+    const decodedWhitelist = this.decodeNewTokenWhitelisted(event);
     if (decodedWhitelist) {
-      await this.handler.handleTokenWhitelistStatusUpdated(
+      await this.handler.handleNewTokenWhitelisted(
         decodedWhitelist,
         store,
         this.chainId
@@ -107,7 +107,7 @@ export class SubtensorProcessor {
     }
   }
 
-  private decodeTokenWhitelistStatusUpdated<E extends EventRecord>(event: E) {
+  private decodeNewTokenWhitelisted<E extends EventRecord>(event: E) {
     try {
       return events.NewTokenWhitelisted.decode(event);
     } catch (error) {

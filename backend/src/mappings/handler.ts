@@ -243,16 +243,22 @@ export class MappingHandler {
     }
   }
 
-  async handleTokenWhitelistStatusUpdated(
+  async handleNewTokenWhitelisted(
     decodedEvent: {
       tokenKey: string;
       tokenMetadata: { decimals: number; name: string; symbol: string };
+      tokenInfo: {
+        tokenAddress: string;
+        managed: boolean;
+        enabled: boolean;
+        supported: boolean;
+      };
     },
     store: Store,
     chainId: number
   ): Promise<void> {
     const handlerLogger = this.logger.child({
-      event: "TokenWhitelistStatusUpdated",
+      event: "NewTokenWhitelisted",
     });
     try {
       const chain = await store.get(Chain, chainId.toString());
@@ -269,7 +275,7 @@ export class MappingHandler {
         id: `${stripHexPrefix(decodedEvent.tokenKey)}-${chain.id}`,
         token: token,
         chain: chain,
-        address: decodedEvent.tokenKey,
+        address: decodedEvent.tokenInfo.tokenAddress,
         native: checkNativeToken(decodedEvent.tokenKey, chainId.toString()),
       });
       token.chains = [tokenWithChain];
@@ -285,7 +291,7 @@ export class MappingHandler {
           `${decodedEvent.tokenKey}-${chain.id}`
         );
       });
-      handlerLogger.info(`TokenWhitelistStatusUpdated processed successfully`);
+      handlerLogger.info(`NewTokenWhitelisted processed successfully`);
     } catch (error) {
       if (
         error instanceof EventDecodingError ||
@@ -294,7 +300,7 @@ export class MappingHandler {
       ) {
         handlerLogger.error(
           { error: error.name },
-          `Error decoding token whitelist status updated event: ${error.message}`
+          `Error decoding new token whitelisted event: ${error.message}`
         );
       } else if (error instanceof TokenMetadataDecodingError) {
         handlerLogger.error(

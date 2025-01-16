@@ -48,7 +48,7 @@ export class EthereumProcessor {
     }
   }
 
-  private decodeTokenWhitelistStatusUpdated(log: Log) {
+  private decodeNewTokenWhitelisted(log: Log) {
     try {
       const decoded = events.NewTokenWhitelisted.decode(log);
       return decoded;
@@ -97,9 +97,9 @@ export class EthereumProcessor {
       return;
     }
 
-    const decodedWhitelist = this.decodeTokenWhitelistStatusUpdated(log);
+    const decodedWhitelist = this.decodeNewTokenWhitelisted(log);
     if (decodedWhitelist) {
-      await this.mappingHandler.handleTokenWhitelistStatusUpdated(
+      await this.mappingHandler.handleNewTokenWhitelisted(
         decodedWhitelist,
         store,
         this.chainId
