@@ -9,6 +9,8 @@ services:
       - "6011:5053"
     command: ["relayer", "start", "--log-level", "debug"]
     restart: on-failure
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
 
   subtensor:
     container_name: subtensor-dev
@@ -17,12 +19,8 @@ services:
       dockerfile: devops/docker/subtensor.Dockerfile
     ports:
       - "9944:9944"
-      - "30333:30333"
-      - "9933:9933"
     expose:
       - "9944"
-      - "30333"
-      - "9933"
     environment:
       - CARGO_HOME=/var/www/node-subtensor/.cargo
     command: ["--dev", "--rpc-external", "--rpc-cors", "all"]
@@ -48,6 +46,26 @@ services:
     ports:
       - "5432:5432"
     shm_size: 1gb
+  
+  sqd-processor:
+    build:
+      context: ../..
+      dockerfile: devops/docker/sqd-processor.Dockerfile
+    container_name: sqd-processor
+    environment:
+      - SUBTENSOR_RPC_ENDPOINT=http://host.docker.internal:9944
+      - EVM_RPC_ENDPOINT=http://host.docker.internal:8545
+      - SUBTENSOR_CONTRACT_ADDRESS=0x057ef64E23666F000b34aE31332854aCBd1c8544
+      - EVM_CONTRACT_ADDRESS=0x261D8c5e9742e6f7f1076Fa1F560894524e19cad
+      - DB_HOST=host.docker.internal
+      - DB_PORT=5432
+      - DB_USER=postgres
+      - DB_PASSWORD=postgres
+      - DB_NAME=postgres
+    ports:
+      - "4350:4350"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
 
 networks:
   default:

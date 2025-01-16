@@ -10,8 +10,10 @@ export class SubtensorProcessor {
   private logger: Logger;
   private handler: MappingHandler;
   private chainId: number;
-  private CONTRACT_ADDRESS =
-    process.env.CONTRACT_ADDRESS ||
+  private rpcEndpoint =
+    process.env.SUBTENSOR_RPC_ENDPOINT || "http://127.0.0.1:9944";
+  private contractAddress =
+    process.env.SUBTENSOR_CONTRACT_ADDRESS ||
     "0x057ef64E23666F000b34aE31332854aCBd1c8544";
 
   constructor() {
@@ -21,10 +23,10 @@ export class SubtensorProcessor {
 
     this.processor = new SubstrateBatchProcessor()
       .setBlockRange({ from: 0 })
-      .setRpcEndpoint("http://127.0.0.1:9944")
+      .setRpcEndpoint(this.rpcEndpoint)
       .setFinalityConfirmation(0)
       .addEvmLog({
-        address: [this.CONTRACT_ADDRESS],
+        address: [this.contractAddress],
       })
       .setFields({
         event: {
@@ -36,7 +38,7 @@ export class SubtensorProcessor {
       });
 
     this.logger.info(
-      `Subtensor Processor initialized with rpc endpoint 127.0.0.1:9944`
+      `Subtensor Processor initialized with rpc endpoint ${this.rpcEndpoint}`
     );
   }
 

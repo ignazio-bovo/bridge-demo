@@ -8,8 +8,9 @@ export class EthereumProcessor {
   private chainId = 1;
   private processor: EvmBatchProcessor<{ log: { transactionHash: true } }>;
   private logger: Logger;
-  private CONTRACT_ADDRESS =
-    process.env.CONTRACT_ADDRESS ||
+  private rpcEndpoint = process.env.EVM_RPC_ENDPOINT || "http://127.0.0.1:8545";
+  private contractAddress =
+    process.env.EVM_CONTRACT_ADDRESS ||
     "0x261D8c5e9742e6f7f1076Fa1F560894524e19cad";
 
   private mappingHandler: MappingHandler;
@@ -20,14 +21,14 @@ export class EthereumProcessor {
     this.logger = createLogger("sqd:evm-processor");
     this.processor = new EvmBatchProcessor()
       .setBlockRange({ from: 0 })
-      .setRpcEndpoint("http://127.0.0.1:8545")
+      .setRpcEndpoint(this.rpcEndpoint)
       .setFinalityConfirmation(0)
       .addLog({
-        address: [this.CONTRACT_ADDRESS],
+        address: [this.contractAddress],
       });
 
     this.logger.info(
-      `Ethereum Processor initialized with rpc endpoint 127.0.0.1:8545`
+      `Ethereum Processor initialized with rpc endpoint ${this.rpcEndpoint}`
     );
   }
 
