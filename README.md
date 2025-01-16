@@ -4,23 +4,9 @@
 
 Assumes that NodeJs v20+ and Docker are installed.
 
-Install squid
-
-```
-npm i -g @subsquid/cli
-```
-
 # Build
 
-1. Build backend dependency
-
-```
-cd backend
-npm i
-sqd build
-```
-
-2. Install dependencies on the smart contract directories
+1. Install dependencies on the smart contract directories
 
 ```
 cd smart-contracts
@@ -51,7 +37,7 @@ npm run relayer:start
 npm run backend:start
 ```
 
-(Ctrl+C to stop the processing and then `npm run backend:down` to bring down the db container)
+(`npm run backend:stop` for stopping)
 
 # Info For FE development
 
