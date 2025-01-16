@@ -20,6 +20,7 @@ import (
 	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/ethereum/go-ethereum/ethclient"
 	"github.com/joho/godotenv"
+	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
 )
 
@@ -37,6 +38,7 @@ type DefaultConfirmTx struct {
 	chainId                uint64
 	contractABI            *abi.ABI
 	destinationNativeToken common.Address
+	logger                 *zerolog.Logger
 }
 
 func NewDefaultConfirmTx(endChannel chan []domain_common.BridgeTxData, destinationClient *ethclient.Client, network observer_domain.Network, sourceClient *ethclient.Client) (*DefaultConfirmTx, error) {
@@ -46,6 +48,7 @@ func NewDefaultConfirmTx(endChannel chan []domain_common.BridgeTxData, destinati
 		log.Error().AnErr("Error getting contract ABI", err)
 		return nil, err
 	}
+	logger := log.Logger.With().Str("Network", network.Name).Str("Module", "Listener").Logger()
 
 	return &DefaultConfirmTx{
 		endChannel:             endChannel,
@@ -56,6 +59,7 @@ func NewDefaultConfirmTx(endChannel chan []domain_common.BridgeTxData, destinati
 		contractABI:            contractABI,
 		sourceClient:           sourceClient,
 		destinationNativeToken: common.Address{},
+		logger:                 &logger,
 	}, nil
 }
 
@@ -104,7 +108,7 @@ func (c *DefaultConfirmTx) getGasPrice() (*big.Int, error) {
 	// 10% increase
 	gasPrice = new(big.Int).Mul(gasPrice, big.NewInt(110))
 	gasPrice = gasPrice.Div(gasPrice, big.NewInt(100))
-	log.Debug().Msgf("💰 Gas price: %d", gasPrice)
+	c.logger.Debug().Msgf("💰 Gas price: %d", gasPrice)
 	return gasPrice, nil
 }
 
@@ -120,11 +124,11 @@ func (c *DefaultConfirmTx) estimateGasLimit(from common.Address, gasPrice *big.I
 
 	gasLimit, err := c.destinationClient.EstimateGas(context.Background(), msg)
 	if err != nil {
-		log.Error().AnErr("Error estimating gas limit", err)
+		c.logger.Error().AnErr("Error estimating gas limit", err)
 		gasLimit = uint64(400000) // Fallback
-		log.Warn().Msgf("Using fallback gas limit of %d on chainId %d", gasLimit, c.chainId)
+		c.logger.Warn().Msgf("Using fallback gas limit of %d on chainId %d", gasLimit, c.chainId)
 	}
-	log.Debug().Msgf("⛽ Gas limit: %d", gasLimit)
+	c.logger.Debug().Msgf("⛽ Gas limit: %d", gasLimit)
 	return gasLimit, nil
 }
 
@@ -132,7 +136,7 @@ func (c *DefaultConfirmTx) calculateTotalValue(batch []domain_common.BridgeTxDat
 	totalValue := big.NewInt(0)
 	for _, request := range batch {
 		if c.isNativeToken(request.TokenKey) {
-			log.Debug().Msgf("💰 Amount for user %s: %d", request.To, request.Amount)
+			c.logger.Debug().Msgf("💰 Amount for user %s: %d", request.To, request.Amount)
 			totalValue.Add(totalValue, request.Amount)
 		}
 	}
@@ -142,14 +146,14 @@ func (c *DefaultConfirmTx) calculateTotalValue(batch []domain_common.BridgeTxDat
 func (c *DefaultConfirmTx) checkBalance(from common.Address, gasPrice *big.Int, gasLimit uint64, totalValue *big.Int) error {
 	balance, err := c.destinationClient.BalanceAt(context.Background(), from, nil)
 	if err != nil {
-		log.Error().AnErr("Error getting signer balance", err)
+		c.logger.Error().AnErr("Error getting signer balance", err)
 		return err
 	}
 
 	gasCost := new(big.Int).Mul(gasPrice, big.NewInt(int64(gasLimit)))
 	totalCost := new(big.Int).Add(gasCost, totalValue)
 
-	log.Info().
+	c.logger.Info().
 		Str("signer_balance", balance.String()).
 		Str("total_cost", totalCost.String()).
 		Str("gas_cost", gasCost.String()).
@@ -166,14 +170,14 @@ func (c *DefaultConfirmTx) buildAndSignTransaction(nonce uint64, gasLimit uint64
 	// Get the suggested priority fee (tip)
 	gasTipCap, err := c.destinationClient.SuggestGasTipCap(context.Background())
 	if err != nil {
-		log.Error().AnErr("Error getting suggested tip cap", err)
+		c.logger.Error().AnErr("Error getting suggested tip cap", err)
 		return nil, err
 	}
 
 	// Get the latest header to fetch current base fee
 	header, err := c.destinationClient.HeaderByNumber(context.Background(), nil)
 	if err != nil {
-		log.Error().AnErr("Error getting latest header", err)
+		c.logger.Error().AnErr("Error getting latest header", err)
 		return nil, err
 	}
 
@@ -195,11 +199,11 @@ func (c *DefaultConfirmTx) buildAndSignTransaction(nonce uint64, gasLimit uint64
 
 	signedTx, err := types.SignTx(tx, types.NewLondonSigner(big.NewInt(int64(c.chainId))), privateKey)
 	if err != nil {
-		log.Error().AnErr("Error signing transaction", err)
+		c.logger.Error().AnErr("Error signing transaction", err)
 		return nil, err
 	}
 
-	log.Debug().
+	c.logger.Debug().
 		Str("baseFee", baseFee.String()).
 		Str("maxFeePerGas", maxFeePerGas.String()).
 		Str("gasTipCap", gasTipCap.String()).
@@ -211,7 +215,7 @@ func (c *DefaultConfirmTx) buildAndSignTransaction(nonce uint64, gasLimit uint64
 func (c *DefaultConfirmTx) ConfirmTransferRequest(batch []domain_common.BridgeTxData) error {
 	// Load environment variables
 	if err := godotenv.Load(); err != nil {
-		log.Warn().Msg("Error loading .env file")
+		c.logger.Warn().Msg("Error loading .env file")
 	}
 
 	// Get private key and address from env
@@ -223,7 +227,7 @@ func (c *DefaultConfirmTx) ConfirmTransferRequest(batch []domain_common.BridgeTx
 	// Get transaction parameters
 	nonce, err := c.destinationClient.PendingNonceAt(context.Background(), fromAddress)
 	if err != nil {
-		log.Error().AnErr("Error getting pending nonce", err)
+		c.logger.Error().AnErr("Error getting pending nonce", err)
 		return err
 	}
 
@@ -236,7 +240,7 @@ func (c *DefaultConfirmTx) ConfirmTransferRequest(batch []domain_common.BridgeTx
 	// Pack transaction data
 	data, err := c.contractABI.Pack("executeTransferRequests", batch)
 	if err != nil || len(data) == 0 {
-		log.Error().AnErr("Error packing transaction data", err)
+		c.logger.Error().AnErr("Error packing transaction data", err)
 		return err
 	}
 
@@ -268,11 +272,11 @@ func (c *DefaultConfirmTx) ConfirmTransferRequest(batch []domain_common.BridgeTx
 
 	// Send and monitor transaction
 	if err := c.sendAndMonitorTransaction(signedTx); err != nil {
-		log.Debug().Err(err).Msg("Error sending transaction")
+		c.logger.Debug().Err(err).Msg("Error sending transaction")
 		return err
 	}
 
-	log.Debug().Str("tx_hash", signedTx.Hash().Hex()).Msg("🎯 Transaction sent")
+	c.logger.Debug().Str("tx_hash", signedTx.Hash().Hex()).Msg("🎯 Transaction sent")
 	return nil
 }
 
@@ -294,7 +298,7 @@ func (c *DefaultConfirmTx) sendAndMonitorTransaction(signedTx *types.Transaction
 			}
 		}
 
-		log.Debug().Err(err).Msg("Error sending transaction")
+		c.logger.Debug().Err(err).Msg("Error sending transaction")
 		return err
 	}
 

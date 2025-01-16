@@ -44,7 +44,7 @@ func NewWebsocketEventListener(
 	messageBus *EventBus,
 	parser EventParser,
 ) (*WebsocketEventListener, error) {
-	logger := log.Logger.With().Str("Network", network.Name).Str("Module", "👂 Listener").Logger()
+	logger := log.Logger.With().Str("Network", network.Name).Str("Module", "Listener").Logger()
 
 	return &WebsocketEventListener{
 		ethClient:           ethClient,

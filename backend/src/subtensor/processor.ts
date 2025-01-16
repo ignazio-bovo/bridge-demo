@@ -51,6 +51,15 @@ export class SubtensorProcessor {
       return;
     }
 
+    const decodedTransferRequested = this.decodeTransferRequested(event);
+    if (decodedTransferRequested) {
+      await this.handler.handleTransferRequested(
+        decodedTransferRequested,
+        store
+      );
+      return;
+    }
+
     const decodedWhitelist = this.decodeTokenWhitelistStatusUpdated(event);
     if (decodedWhitelist) {
       await this.handler.handleTokenWhitelistStatusUpdated(
@@ -69,6 +78,14 @@ export class SubtensorProcessor {
         store
       );
       return;
+    }
+  }
+
+  private decodeTransferRequested<E extends EventRecord>(event: E) {
+    try {
+      return events.TransferRequested.decode(event);
+    } catch (error) {
+      return null;
     }
   }
 

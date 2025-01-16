@@ -37,11 +37,6 @@ services:
     environment:
       - ANVIL_PORT=8545
       - ANVIL_CHAIN_ID=1
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8545"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
 
   db:
     container_name: squid-db

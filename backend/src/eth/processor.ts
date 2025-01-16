@@ -56,6 +56,15 @@ export class EthereumProcessor {
     }
   }
 
+  private decodeTransferRequested(log: Log) {
+    try {
+      const decoded = events.TransferRequested.decode(log);
+      return decoded;
+    } catch (error) {
+      return null;
+    }
+  }
+
   async run(db: TypeormDatabase): Promise<void> {
     this.processor.run(db, async (ctx) => {
       for (let block of ctx.blocks) {
@@ -74,6 +83,15 @@ export class EthereumProcessor {
         decodedTokenWrapped,
         store,
         this.chainId
+      );
+      return;
+    }
+
+    const decodedTransferRequested = this.decodeTransferRequested(log);
+    if (decodedTransferRequested) {
+      await this.mappingHandler.handleTransferRequested(
+        decodedTransferRequested,
+        store
       );
       return;
     }

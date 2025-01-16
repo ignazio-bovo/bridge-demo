@@ -9,7 +9,7 @@ export function stripHexPrefix(hex: string): string {
   return hex;
 }
 export function transferId(nonce: number, srcChainId: number): string {
-  return keccak256(ethers.toUtf8Bytes(`${nonce}-${srcChainId}`));
+  return keccak256(ethers.toUtf8Bytes(`${nonce}:${srcChainId}`));
 }
 export function checkNativeToken(tokenKey: string, chainId: string): boolean {
   return (
