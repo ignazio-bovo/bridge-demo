@@ -48,8 +48,8 @@ task("functions:whitelistToken", "Whitelists a token on the Bridge contract")
       tokenKey,
       true,
       tokenAddress,
-      name,
       symbol,
+      name,
       decimals
     );
 

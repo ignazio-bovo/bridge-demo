@@ -34,7 +34,7 @@ services:
       - "8545:8545"
     environment:
       - ANVIL_PORT=8545
-      - ANVIL_CHAIN_ID=1
+      - ANVIL_CHAIN_ID=31337
 
   db:
     container_name: squid-db
@@ -46,7 +46,7 @@ services:
     ports:
       - "5432:5432"
     shm_size: 1gb
-  
+
   sqd-processor:
     build:
       context: ../..
