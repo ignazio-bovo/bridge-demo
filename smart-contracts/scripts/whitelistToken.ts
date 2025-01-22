@@ -3,7 +3,7 @@ import {
   privateKeys,
   fundSubtensorAccount,
   subtensorExtraConfig,
-} from "./fundSubtensorAccounts";
+} from "./subtensorUtils";
 
 async function main(): Promise<void> {
   const accounts = await ethers.getSigners();

@@ -191,3 +191,21 @@ export async function fundSubtensorAccount(
 
   await api.disconnect();
 }
+
+export async function sudoSetEvmChainId(chainId: number) {
+  const wsProvider = new WsProvider(subtensorExtraConfig.wsUrl);
+  const api = await ApiPromise.create({ provider: wsProvider });
+  const keyring = new Keyring({ type: "sr25519" });
+
+  const sender = keyring.addFromUri("//Alice"); // Alice's default development account
+
+  const txSudoSetEvmChainId = api.tx.sudo.sudo(
+    api.tx.adminUtils.sudoSetEvmChainId(chainId)
+  );
+
+  const txSender = new Sender(api, keyring);
+  await txSender.signAndSend(txSudoSetEvmChainId, sender.address);
+  console.log(`EVM chain ID set to ${chainId}`);
+
+  await api.disconnect();
+}

@@ -1,7 +1,11 @@
 import { ethers, network } from "hardhat";
-import { fundSubtensorAccount } from "./fundSubtensorAccounts";
+import { fundSubtensorAccount, sudoSetEvmChainId } from "./subtensorUtils";
+import dotenv from "dotenv";
+
+dotenv.config();
 
 const SUBTENSOR_GAS_LIMIT = 30000000;
+const SUBTENSOR_CHAIN_ID = process.env.SUBTENSOR_CHAIN_ID;
 
 async function main(): Promise<void> {
   const accounts = await ethers.getSigners();
@@ -13,6 +17,8 @@ async function main(): Promise<void> {
   const deployerAddress = await deployer.getAddress();
   const adminAddress = await admin.getAddress();
   const authorityAddress = await authority.getAddress();
+
+  await sudoSetEvmChainId(Number(SUBTENSOR_CHAIN_ID));
 
   if (network.name !== "subevmTestnet") {
     await fundSubtensorAccount(deployerAddress, 1000000);

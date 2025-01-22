@@ -3,14 +3,14 @@ ethereum:
   # rpc_endpoint: "https://sepolia.gateway.tenderly.co"
   rpc_endpoint: "http://host.docker.internal:8545"
   address: "0x261D8c5e9742e6f7f1076Fa1F560894524e19cad"
-  chain_id: 1
+  chain_id: 31337
   block_confirmations: 0
   block_production_time: 6s
   start_block: 0
 
 subtensor:
   name: "Subtensor"
-  chain_id: 0
+  chain_id: 31338
   rpc_endpoint: "http://host.docker.internal:9944"
   # rpc_endpoint: "https://evm-testnet.dev.opentensor.ai"
   address: "0x057ef64E23666F000b34aE31332854aCBd1c8544"

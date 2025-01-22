@@ -3,7 +3,7 @@ import { HardhatRuntimeEnvironment } from "hardhat/types";
 import { Bridge, BridgedToken } from "../../typechain-types";
 import DeployedContracts from "../result/contract.json";
 import { ethers } from "ethers";
-import { fundSubtensorAccount } from "../../scripts/fundSubtensorAccounts";
+import { fundSubtensorAccount } from "../../scripts/subtensorUtils";
 
 export const createTokenMetadata = (
   tokenSymbol: string,
