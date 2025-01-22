@@ -5,7 +5,7 @@ import { MappingHandler } from "../mappings/handler";
 import { events } from "../abi/Bridge.sol";
 
 export class EthereumProcessor {
-  private chainId = 1;
+  private chainId = process.env.EVM_CHAIN_ID || 31337;
   private processor: EvmBatchProcessor<{ log: { transactionHash: true } }>;
   private logger: Logger;
   private rpcEndpoint = process.env.EVM_RPC_ENDPOINT || "http://127.0.0.1:8545";
@@ -83,7 +83,7 @@ export class EthereumProcessor {
       await this.mappingHandler.handleTokenWrapped(
         decodedTokenWrapped,
         store,
-        this.chainId
+        Number(this.chainId)
       );
       return;
     }
@@ -102,7 +102,7 @@ export class EthereumProcessor {
       await this.mappingHandler.handleNewTokenWhitelisted(
         decodedWhitelist,
         store,
-        this.chainId
+        Number(this.chainId)
       );
       return;
     }

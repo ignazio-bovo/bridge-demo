@@ -19,7 +19,7 @@ export class SubtensorProcessor {
   constructor() {
     this.logger = createLogger("sqd:subtensor-processor");
     this.handler = new MappingHandler();
-    this.chainId = 945;
+    this.chainId = Number(process.env.SUBTENSOR_CHAIN_ID) || 945;
 
     this.processor = new SubstrateBatchProcessor()
       .setBlockRange({ from: 0 })

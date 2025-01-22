@@ -26,15 +26,17 @@ services:
     command: ["--dev", "--rpc-external", "--rpc-cors", "all"]
 
   evm:
-    container_name: evm-dev
     build:
       context: ../..
       dockerfile: devops/docker/evm.Dockerfile
     ports:
       - "8545:8545"
+    volumes:
+      - ../../smart-contracts/hardhat.config.ts:/app/hardhat.config.ts:ro
     environment:
-      - ANVIL_PORT=8545
-      - ANVIL_CHAIN_ID=31337
+      - HARDHAT_NETWORK=hardhat
+    command: ["npx", "hardhat", "node", "--network", "hardhat"]
+ 
 
   db:
     container_name: squid-db

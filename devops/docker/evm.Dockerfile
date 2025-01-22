@@ -1,30 +1,15 @@
-# This Dockerfile is used to build the EVM 
-FROM ubuntu:20.04
+FROM node:18-slim
 
-SHELL ["/bin/bash", "-c"]
+WORKDIR /app
 
-RUN apt update
+# Install basic dependencies
+RUN apt-get update && \
+    apt-get install -y python3 make g++ && \
+    rm -rf /var/lib/apt/lists/*
 
-RUN apt install -y curl git
+COPY ../../smart-contracts ./
 
-# install foundry
-RUN curl -L https://foundry.paradigm.xyz | bash
-
-RUN /root/.foundry/bin/foundryup
-
-
-# recreate the foundry directory structure inside the container
-RUN mkdir /root/lib
-RUN mkdir /root/script
-RUN mkdir /root/src
-
-WORKDIR /root
-# Expose the default Anvil port
+RUN npm install
 EXPOSE 8545
 
-# Add environment variables with defaults
-ENV ANVIL_PORT=8545
-ENV ANVIL_CHAIN_ID=1
-
-# Update CMD to use environment variables
-CMD ["/bin/bash", "-c", "/root/.foundry/bin/anvil --port $ANVIL_PORT --chain-id $ANVIL_CHAIN_ID --host 0.0.0.0"]
+CMD ["npx", "hardhat", "node", "--network", "hardhat"]

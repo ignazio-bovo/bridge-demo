@@ -11,4 +11,4 @@ docker compose -f ./devops/docker/docker-compose.yml up -d db &&
     done
 
 # Start processor
-docker compose -f ./devops/docker/docker-compose.yml up -d sqd-processor
+docker compose -f ./devops/docker/docker-compose.yml up -d sqd-processor --build
