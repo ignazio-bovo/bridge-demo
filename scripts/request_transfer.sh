@@ -8,5 +8,5 @@ npx hardhat functions:requestTransfer --network localhost --to 0x70997970C51812d
 echo "✅ Ethereum -> Subtensor ETH transfer requested"
 
 echo "💸 Requesting transfer in TAO from Subtensor to Ethereum..."
-npx hardhat run scripts/requestTransfer.ts --network other
+npx hardhat run scripts/requestTransfer.ts --network other_after_setup
 echo "✅ Subtensor -> Ethereum TAO transfer requested"

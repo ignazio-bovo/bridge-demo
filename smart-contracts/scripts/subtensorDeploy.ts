@@ -5,11 +5,12 @@ import dotenv from "dotenv";
 dotenv.config();
 
 const SUBTENSOR_GAS_LIMIT = 30000000;
-const SUBTENSOR_CHAIN_ID = process.env.SUBTENSOR_CHAIN_ID;
+const SUBTENSOR_CHAIN_ID = process.env.SUBTENSOR_CHAIN_ID || "31338";
 
 async function main(): Promise<void> {
   const accounts = await ethers.getSigners();
   const deployer = network.name === "subevmTestnet" ? accounts[0] : accounts[3];
+  const user = network.name === "subevmTestnet" ? accounts[0] : accounts[2];
   const admin = network.name === "subevmTestnet" ? accounts[0] : accounts[0];
   const authority =
     network.name === "subevmTestnet" ? accounts[0] : accounts[1];
@@ -21,9 +22,11 @@ async function main(): Promise<void> {
   await sudoSetEvmChainId(Number(SUBTENSOR_CHAIN_ID));
 
   if (network.name !== "subevmTestnet") {
+    const userAddress = await user.getAddress();
     await fundSubtensorAccount(deployerAddress, 1000000);
     await fundSubtensorAccount(adminAddress, 1000000);
     await fundSubtensorAccount(authorityAddress, 1000000);
+    await fundSubtensorAccount(userAddress, 1000000);
   }
 
   // Deploy upgradeable bridge

@@ -11,7 +11,7 @@
     "relayer:stop": "docker compose -f devops/docker/docker-compose.yml down relayer",
     "subtensor:start": "docker compose -f devops/docker/docker-compose.yml up -d subtensor",
     "subtensor:stop": "docker compose -f devops/docker/docker-compose.yml down subtensor",
-    "evm:start": "docker compose -f devops/docker/docker-compose.yml up -d evm",
+    "evm:start": "docker compose -f devops/docker/docker-compose.yml up -d evm --build && sleep 5",
     "evm:stop": "docker compose -f devops/docker/docker-compose.yml down evm",
     "backend:start": "./scripts/start_backend.sh",
     "backend:stop": "./scripts/stop_backend.sh",
@@ -19,8 +19,10 @@
     "contracts:subtensor:deploy": "./scripts/subtensor_deploy.sh",
     "contracts:request_transfer": "./scripts/request_transfer.sh",
     "contracts:whitelist_token": "./scripts/whitelist_token.sh",
-    "environment:up": "npm run evm:start && npm run subtensor:start && npm run contracts:evm:deploy && npm run contracts:subtensor:deploy",
-    "environment:down": "npm run evm:stop && npm run subtensor:stop"
+    "contracts:up": "npm run evm:start && npm run subtensor:start && npm run contracts:evm:deploy && npm run contracts:subtensor:deploy",
+    "contracts:down": "npm run evm:stop && npm run subtensor:stop",
+    "environment:up": "npm run contracts:up && npm run backend:start && npm run relayer:start",
+    "environment:down": "npm run contracts:down && npm run backend:stop && npm run relayer:stop"
   },
   "devDependencies": {
     "husky": "^8.0.3",

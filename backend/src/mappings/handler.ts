@@ -152,25 +152,22 @@ export class MappingHandler {
         Number(decodedEvent.request.nonce),
         Number(decodedEvent.request.srcChainId)
       );
+
+      const sourceChainId = decodedEvent.request.srcChainId.toString();
+      const destinationChainId = decodedEvent.request.destChainId.toString();
       const sourceChain = await store
-        .get(Chain, decodedEvent.request.srcChainId.toString())
+        .get(Chain, sourceChainId)
         .then((chain) => {
           if (!chain) {
-            throw new EntityNotFoundError(
-              "Chain",
-              decodedEvent.request.srcChainId.toString()
-            );
+            throw new EntityNotFoundError("Chain", sourceChainId);
           }
           return chain;
         });
       const destinationChain = await store
-        .get(Chain, decodedEvent.request.destChainId.toString())
+        .get(Chain, destinationChainId)
         .then((chain) => {
           if (!chain) {
-            throw new EntityNotFoundError(
-              "Chain",
-              decodedEvent.request.destChainId.toString()
-            );
+            throw new EntityNotFoundError("Chain", destinationChainId);
           }
           return chain;
         });
@@ -237,6 +234,11 @@ export class MappingHandler {
           { error: error.name },
           `Error decoding transfer requested event: ${error.message}`
         );
+      } else if (error instanceof UpsertFailedError) {
+        handlerLogger.error(
+          { error: error.name },
+          `Upsert failed: ${error.message}`
+        );
       } else {
         handlerLogger.error(`Error with typeorm operation: ${error}`);
       }
@@ -291,7 +293,9 @@ export class MappingHandler {
           `${decodedEvent.tokenKey}-${chain.id}`
         );
       });
-      handlerLogger.info(`NewTokenWhitelisted processed successfully`);
+      handlerLogger.info(
+        `NewTokenWhitelisted processed successfully for chain ${chainId}`
+      );
     } catch (error) {
       if (
         error instanceof EventDecodingError ||

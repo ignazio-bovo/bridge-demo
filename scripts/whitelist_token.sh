@@ -8,5 +8,5 @@ npx hardhat functions:whitelistToken --network localhost --address 0x00000000000
 echo "✅ Token whitelisted on Ethereum"
 
 echo "🔑 Whitelisting token on Subtensor..."
-npx hardhat run scripts/whitelistToken.ts --network other
+npx hardhat run scripts/whitelistToken.ts --network other_after_setup
 echo "✅ Token whitelisted on Subtensor"

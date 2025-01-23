@@ -26,17 +26,15 @@ services:
     command: ["--dev", "--rpc-external", "--rpc-cors", "all"]
 
   evm:
+    container_name: evm-dev
     build:
       context: ../..
       dockerfile: devops/docker/evm.Dockerfile
     ports:
       - "8545:8545"
-    volumes:
-      - ../../smart-contracts/hardhat.config.ts:/app/hardhat.config.ts:ro
     environment:
-      - HARDHAT_NETWORK=hardhat
-    command: ["npx", "hardhat", "node", "--network", "hardhat"]
- 
+      - ANVIL_PORT=8545
+      - ANVIL_CHAIN_ID=31337
 
   db:
     container_name: squid-db
@@ -59,6 +57,8 @@ services:
       - EVM_RPC_ENDPOINT=http://host.docker.internal:8545
       - SUBTENSOR_CONTRACT_ADDRESS=0x057ef64E23666F000b34aE31332854aCBd1c8544
       - EVM_CONTRACT_ADDRESS=0x261D8c5e9742e6f7f1076Fa1F560894524e19cad
+      - SUBTENSOR_CHAIN_ID=31338
+      - EVM_CHAIN_ID=31337
       - DB_HOST=host.docker.internal
       - DB_PORT=5432
       - DB_USER=postgres

@@ -21,11 +21,12 @@ task(
   "functions:requestTransfer",
   "Requests a transfer from the Bridge contract"
 )
+  .addFlag("native", "Use native token")
   .addParam("to", "The recipient address")
   .addParam("amount", "The amount to transfer (in ETH)")
   .addParam("destination", "The destination chain ID")
   .setAction(async (taskArgs, hre: HardhatRuntimeEnvironment) => {
-    const { to, amount: amountUnit, destination } = taskArgs;
+    const { to, amount: amountUnit, destination, native } = taskArgs;
 
     const signers = await hre.ethers.getSigners();
     const fromSigner = signers[2];
@@ -58,7 +59,6 @@ task(
 
     // Convert amount to Wei
     const amount = hre.ethers.parseEther(amountUnit);
-
     const tx = await bridge
       .connect(fromSigner)
       .requestTransfer(tokenKey, to, amount, BigInt(destination), {

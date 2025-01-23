@@ -8,10 +8,10 @@ export class EthereumProcessor {
   private chainId = process.env.EVM_CHAIN_ID || 31337;
   private processor: EvmBatchProcessor<{ log: { transactionHash: true } }>;
   private logger: Logger;
-  private rpcEndpoint = process.env.EVM_RPC_ENDPOINT || "http://127.0.0.1:8545";
+  private rpcEndpoint = process.env.EVM_RPC_ENDPOINT || "http://localhost:8545";
   private contractAddress =
     process.env.EVM_CONTRACT_ADDRESS ||
-    "0x261D8c5e9742e6f7f1076Fa1F560894524e19cad";
+    "0x057ef64E23666F000b34aE31332854aCBd1c8544";
 
   private mappingHandler: MappingHandler;
 
@@ -33,10 +33,12 @@ export class EthereumProcessor {
   }
 
   private decodeTokenWrapped(log: Log) {
-    if (log.topics[0] !== events.TokenWrapped.topic) {
+    try {
+      const decoded = events.TokenWrapped.decode(log);
+      return decoded;
+    } catch (error) {
       return null;
     }
-    return events.TokenWrapped.decode(log);
   }
 
   private decodeTransferRequestExecuted(log: Log) {

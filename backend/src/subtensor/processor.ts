@@ -9,9 +9,9 @@ export class SubtensorProcessor {
   private processor: SubstrateBatchProcessor;
   private logger: Logger;
   private handler: MappingHandler;
-  private chainId: number;
+  private chainId = Number(process.env.SUBTENSOR_CHAIN_ID) || 31338;
   private rpcEndpoint =
-    process.env.SUBTENSOR_RPC_ENDPOINT || "http://127.0.0.1:9944";
+    process.env.SUBTENSOR_RPC_ENDPOINT || "http://host.docker.internal:9944";
   private contractAddress =
     process.env.SUBTENSOR_CONTRACT_ADDRESS ||
     "0x057ef64E23666F000b34aE31332854aCBd1c8544";
@@ -19,7 +19,6 @@ export class SubtensorProcessor {
   constructor() {
     this.logger = createLogger("sqd:subtensor-processor");
     this.handler = new MappingHandler();
-    this.chainId = Number(process.env.SUBTENSOR_CHAIN_ID) || 945;
 
     this.processor = new SubstrateBatchProcessor()
       .setBlockRange({ from: 0 })

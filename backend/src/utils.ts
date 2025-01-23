@@ -18,7 +18,7 @@ export function checkNativeToken(tokenKey: string, chainId: string): boolean {
       (chainId === "1" || chainId === "31337")) ||
     (stripHexPrefix(tokenKey) ===
       "3a636391d72d0aec588d3a7908f5b3950fa7ac843ef46bf86ed066ba010044de" &&
-      (chainId === "945" || chainId === "0"))
+      (chainId === "945" || chainId === "31338"))
   );
 }
 
