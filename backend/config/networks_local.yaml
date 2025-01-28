@@ -1,0 +1,19 @@
+ethereum:
+  contract_address: "0x261D8c5e9742e6f7f1076Fa1F560894524e19cad"
+  chain_id: 31337
+  finality_confirmations: 0
+  start_block: 0
+  rpc_settings:
+    rate_limit: 100
+    head_poll_interval_s: 1
+    endpoint_url: "http://host.docker.internal:8545"
+
+subtensor:
+  contract_address: "0x057ef64E23666F000b34aE31332854aCBd1c8544"
+  chain_id: 31338
+  finality_confirmations: 0
+  start_block: 0
+  rpc_settings:
+    rate_limit: 100
+    head_poll_interval_s: 1
+    endpoint_url: "http://host.docker.internal:9944"

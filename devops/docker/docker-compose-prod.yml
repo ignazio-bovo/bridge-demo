@@ -10,7 +10,7 @@ services:
     command: ["relayer", "start", "--log-level", "debug"]
     restart: on-failure
     volumes:
-      - ../../relayer/config/networks_local.yaml:/app/config/networks.yaml
+      - ../../relayer/config/networks_prod.yaml:/app/config/networks.yaml
     extra_hosts:
       - "host.docker.internal:host-gateway"
 
@@ -63,7 +63,7 @@ services:
     ports:
       - "4350:4350"
     volumes:
-      - ../../backend/config/networks_local.yaml:/app/config/networks.yaml
+      - ../../backend/config/networks_prod.yaml:/app/config/networks.yaml
     extra_hosts:
       - "host.docker.internal:host-gateway"
 

@@ -9,12 +9,16 @@
     "contracts:test": "./smart-contracts/test/local_tests.sh",
     "relayer:start": "docker compose -f devops/docker/docker-compose.yml up -d relayer --build",
     "relayer:stop": "docker compose -f devops/docker/docker-compose.yml down relayer",
+    "relayer:start:prod": "docker compose -f devops/docker/docker-compose-prod.yml up -d relayer --build",
+    "relayer:stop:prod": "docker compose -f devops/docker/docker-compose-prod.yml down relayer",
     "subtensor:start": "docker compose -f devops/docker/docker-compose.yml up -d subtensor",
     "subtensor:stop": "docker compose -f devops/docker/docker-compose.yml down subtensor",
     "evm:start": "docker compose -f devops/docker/docker-compose.yml up -d evm --build && sleep 5",
     "evm:stop": "docker compose -f devops/docker/docker-compose.yml down evm",
     "backend:start": "./scripts/start_backend.sh",
     "backend:stop": "./scripts/stop_backend.sh",
+    "backend:start:prod": "./scripts/start_backend_prod.sh",
+    "backend:stop:prod": "./scripts/stop_backend_prod.sh",
     "contracts:evm:deploy": "./scripts/evm_deploy.sh",
     "contracts:subtensor:deploy": "./scripts/subtensor_deploy.sh",
     "contracts:request_transfer": "./scripts/request_transfer.sh",
@@ -22,10 +26,15 @@
     "contracts:up": "npm run evm:start && npm run subtensor:start && npm run contracts:evm:deploy && npm run contracts:subtensor:deploy",
     "contracts:down": "npm run evm:stop && npm run subtensor:stop",
     "environment:up": "npm run contracts:up && npm run backend:start && npm run relayer:start",
-    "environment:down": "npm run contracts:down && npm run backend:stop && npm run relayer:stop"
+    "environment:down": "npm run contracts:down && npm run backend:stop && npm run relayer:stop",
+    "environment:up:prod": "npm run backend:start:prod && npm run relayer:start:prod",
+    "environment:down:prod": "npm run backend:stop:prod && npm run relayer:stop:prod"
   },
   "devDependencies": {
     "husky": "^8.0.3",
     "lint-staged": "^15.2.0"
+  },
+  "dependencies": {
+    "yaml": "^2.7.0"
   }
 }

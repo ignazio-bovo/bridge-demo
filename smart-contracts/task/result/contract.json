@@ -1,6 +1,6 @@
 {
   "Bridge_sepolia": "0x5d86428FCA0c404211CA10Fa1E19b79E5e9ee806",
   "StakeManager_sepolia": "0x624c0c0E6b9b1826037C2ab996F2B5CBC07Ec4Fc",
-  "Bridge_localhost": "0x261D8c5e9742e6f7f1076Fa1F560894524e19cad",
-  "StakeManager_localhost": "0xCba6b9A951749B8735C603e7fFC5151849248772"
+  "Bridge_localhost": "0xcf27F781841484d5CF7e155b44954D7224caF1dD",
+  "StakeManager_localhost": "0x6179FBb91b239b574A4565e2c55A6fD38C3372d3"
 }

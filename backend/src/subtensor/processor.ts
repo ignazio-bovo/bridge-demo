@@ -1,31 +1,47 @@
 import { Store, TypeormDatabase } from "@subsquid/typeorm-store";
-import { SubstrateBatchProcessor, Event } from "@subsquid/substrate-processor";
+import { SubstrateBatchProcessor } from "@subsquid/substrate-processor";
 import { Logger, createLogger } from "@subsquid/logger";
 import { MappingHandler } from "../mappings/handler";
 import { events } from "../abi/Bridge.sol";
 import { EventRecord } from "@subsquid/evm-abi";
+import { NetworkConfig, parseYamlConfig } from "../utils";
 
 export class SubtensorProcessor {
+  private config: NetworkConfig;
   private processor: SubstrateBatchProcessor;
   private logger: Logger;
+  private chainId: number;
   private handler: MappingHandler;
-  private chainId = Number(process.env.SUBTENSOR_CHAIN_ID) || 31338;
-  private rpcEndpoint =
-    process.env.SUBTENSOR_RPC_ENDPOINT || "http://host.docker.internal:9944";
-  private contractAddress =
-    process.env.SUBTENSOR_CONTRACT_ADDRESS ||
-    "0x057ef64E23666F000b34aE31332854aCBd1c8544";
 
   constructor() {
     this.logger = createLogger("sqd:subtensor-processor");
     this.handler = new MappingHandler();
+    this.config = parseYamlConfig().subtensor;
+    this.chainId = this.config.chain_id;
+
+    if (!this.config.rpc_settings) {
+      throw new Error(
+        "RPC settings are required because Gateway facilities not provider yet for Bittensor EVM"
+      );
+    }
+
+    this.logger.info(
+      `Subtensor Processor initialized with:\n${JSON.stringify(
+        this.config,
+        null,
+        2
+      )}`
+    );
 
     this.processor = new SubstrateBatchProcessor()
-      .setBlockRange({ from: 0 })
-      .setRpcEndpoint(this.rpcEndpoint)
-      .setFinalityConfirmation(0)
+      .setBlockRange({ from: this.config.start_block })
+      .setFinalityConfirmation(this.config.finality_confirmations)
+      .setRpcEndpoint(this.config.rpc_settings.endpoint_url)
+      .setRpcDataIngestionSettings({
+        headPollInterval: this.config.rpc_settings.head_poll_interval_s,
+      })
       .addEvmLog({
-        address: [this.contractAddress],
+        address: [this.config.contract_address],
       })
       .setFields({
         event: {
@@ -37,7 +53,7 @@ export class SubtensorProcessor {
       });
 
     this.logger.info(
-      `Subtensor Processor initialized with rpc endpoint ${this.rpcEndpoint}`
+      `Subtensor Processor initialized with rpc endpoint ${this.config.rpc_settings.endpoint_url}`
     );
   }
 

@@ -1,0 +1,17 @@
+ethereum:
+  name: "Ethereum"
+  rpc_endpoint: "https://1rpc.io/sepolia"
+  address: "0x5d86428fca0c404211ca10fa1e19b79e5e9ee806"
+  chain_id: 11155111
+  block_confirmations: 0
+  block_production_time: 10s
+  start_block: 7495462
+
+subtensor:
+  name: "Subtensor"
+  chain_id: 945
+  rpc_endpoint: "https://evm-testnet.dev.opentensor.ai"
+  address: "0x9f5B55e9fE30E9c568728B8A1389376c3F444623"
+  block_confirmations: 0
+  block_production_time: 10s
+  start_block: 856253

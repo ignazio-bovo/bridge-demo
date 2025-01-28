@@ -3,32 +3,59 @@ import { Store, TypeormDatabase } from "@subsquid/typeorm-store";
 import { Logger, createLogger } from "@subsquid/logger";
 import { MappingHandler } from "../mappings/handler";
 import { events } from "../abi/Bridge.sol";
+import { NetworkConfig, parseYamlConfig } from "../utils";
 
 export class EthereumProcessor {
-  private chainId = process.env.EVM_CHAIN_ID || 31337;
+  private config: NetworkConfig;
   private processor: EvmBatchProcessor<{ log: { transactionHash: true } }>;
+  private chainId: number;
   private logger: Logger;
-  private rpcEndpoint = process.env.EVM_RPC_ENDPOINT || "http://localhost:8545";
-  private contractAddress =
-    process.env.EVM_CONTRACT_ADDRESS ||
-    "0x057ef64E23666F000b34aE31332854aCBd1c8544";
 
   private mappingHandler: MappingHandler;
 
   constructor() {
     this.mappingHandler = new MappingHandler();
-
+    this.config = parseYamlConfig().ethereum;
+    this.chainId = this.config.chain_id;
     this.logger = createLogger("sqd:evm-processor");
-    this.processor = new EvmBatchProcessor()
-      .setBlockRange({ from: 0 })
-      .setRpcEndpoint(this.rpcEndpoint)
-      .setFinalityConfirmation(0)
-      .addLog({
-        address: [this.contractAddress],
-      });
 
     this.logger.info(
-      `Ethereum Processor initialized with rpc endpoint ${this.rpcEndpoint}`
+      `Ethereum Processor initialized with:\n${JSON.stringify(
+        this.config,
+        null,
+        2
+      )}`
+    );
+
+    this.processor = new EvmBatchProcessor()
+      .setBlockRange({ from: 0 })
+      .setFinalityConfirmation(this.config.finality_confirmations)
+      .addLog({
+        address: [this.config.contract_address],
+      });
+
+    if (this.config.rpc_settings) {
+      this.processor = this.processor
+        .setRpcEndpoint({
+          url: this.config.rpc_settings.endpoint_url,
+          rateLimit: this.config.rpc_settings.rate_limit,
+        })
+        .setRpcDataIngestionSettings({
+          headPollInterval: this.config.rpc_settings.head_poll_interval_s,
+        });
+    } else {
+      if (!this.config.gateway_settings) {
+        throw new Error(
+          "Gateway settings are required because Gateway facilities not provider yet for Ethereum"
+        );
+      }
+      this.processor = this.processor.setGateway(
+        this.config.gateway_settings!.endpoint_url
+      );
+    }
+
+    this.logger.info(
+      `Ethereum Processor initialized with rpc endpoint ${this.config.chain_id}`
     );
   }
 

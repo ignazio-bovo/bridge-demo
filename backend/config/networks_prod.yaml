@@ -1,0 +1,17 @@
+ethereum:
+  contract_address: "0x5d86428fca0c404211ca10fa1e19b79e5e9ee806"
+  chain_id: 11155111
+  finality_confirmations: 5
+  start_block: 0
+  gateway_settings:
+    endpoint_url: "https://v2.archive.subsquid.io/network/ethereum-sepolia"
+
+subtensor:
+  contract_address: "0x9f5B55e9fE30E9c568728B8A1389376c3F444623"
+  chain_id: 945
+  finality_confirmations: 5
+  start_block: 0
+  rpc_settings:
+    rate_limit: 100
+    head_poll_interval_s: 6
+    endpoint_url: "https://evm-testnet.dev.opentensor.ai"
